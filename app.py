@@ -59,6 +59,17 @@ def get_columns(table):
             columns.append(column[0])
     return columns
 
+##Initial connection message
+@app.route('/', methods=['GET'])
+def start_up():
+    welcome_msg = "Welcome to the CODERS database!\n"
+    functions = "For the list of tables: http://[domain]/tables\n"
+    functions += "For a full query of a specified table: http://[domain]/tables/[table]\n"
+    functions +=  "For a list of columns in a specified table: http://[domain]/tables/[table]/attributes\n"
+    functions += "For the results of a query filtered by province: http://[domain]/tables/[table]/[province]"
+
+    return jsonify(welcome_msg + functions)
+
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
