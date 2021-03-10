@@ -14,48 +14,112 @@ app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
 
-# @app.route('/', methods=['GET','POST'])
-# def index():
-#     if request.method == "POST":
-#         ##fetch form data
-#         userDetails = request.form
-#         sub_name = f"\'{userDetails['sub_name']}\'"
-#         sub_code = f"\'{userDetails['sub_code']}\'"
-#         cur = mysql.connection.cursor()
-#         cur.execute(f"INSERT INTO nodes (name, node_code) VALUES({sub_name},{sub_code});")
-#         cur.execute(f"INSERT INTO substations (sub_node_code) VALUES({sub_code});")
-#         mysql.connection.commit()
-#         cur.close()
-    
-#         return "success"
-#     return render_template('index.html')
-def get_columns(table):
+def send_query(query):
+    cur = mysql.connection.cursor()
     try:
-        cur = mysql.connection.cursor()
-        cur.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION")
-        columns = []
-        for column in cur.fetchall():
-            columns.append(column[0])
-        return columns
-    except mysql.connector.Error as err:
+        cur.execute(query)
+        result = cur.fetchall()
+        return result
+    except:
         return 0
 
+def get_columns(table):
+    columns = []
+    query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+    results = send_query(query)
+    for column in results:
+        columns.append(column[0])
+    return columns
+
+
+##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
-    cur = mysql.connection.cursor()
-    cur.execute("SHOW tables;")
-    cur.close()
-    result = jsonify(cur.fetchall())
-    return result
+    query = "SHOW tables;"
+    results = send_query(query)
+    tables = jsonify(results)
+    return tables
 
+##Returns the full table 
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
+    ##get the columns from the specified table
     column_names = get_columns(table)
     if column_names == 0:
         return "Table does not exist."
-    cur = mysql.connection.cursor()
-    cur.execute(f"SELECT * FROM {table};")
-    result = list(cur.fetchall())
+    
+    ##send the query
+    query = f"SELECT * FROM {table};"
+    result = send_query(query)
+
+    ##the table name is incorrect
+    if result == 0:
+        return  jsonify("Table does not exist")
+    result = list(result)
+    ##formats the list to "'column_name': 'value'"
+    for row_idx,row in enumerate(result):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        result[row_idx] = row
+    return jsonify(result)
+
+##Returns the columns from a specified table
+@app.route('/tables/<string:table>/attributes', methods=['GET'])
+def return_columns(table):
+    query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+    attributes = send_query(query)
+
+    ##check if table name is incorrect
+    if attributes == 0:
+        return jsonify("Table does not exist")
+
+    return jsonify(attributes)
+    
+##Returns the reference from the given reference key
+@app.route('/tables/reference-list/<int:key>', methods=['GET'])
+def return_ref(key):
+    ##query the ref list
+    query = f"SELECT * FROM reference_list WHERE id = {key}"
+    source = send_query(query)
+    #check if the source was found
+    if source == 0:
+        return jsonify("Key not found")
+    table = "reference_list"
+
+    ##get the column names from the reference list
+    column_names = get_columns(table)
+    if column_names == 0:
+        return "Table does not exist."
+    
+    ##Format the list to "column_name: value"
+    source = list(source)
+    for row_idx,row in enumerate(source):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        source[row_idx] = row
+    
+    return jsonify(source)
+
+##Returns the specified table based on Province
+@app.route('/tables/<string:table>/<string:province>', methods=['GET'])
+def return_based_on_prov(table, province):
+    ##query the table based on province
+    query = f"SELECT * FROM {table} WHERE province = '{province}';"
+    result = send_query(query)
+
+    ##get the column names
+    column_names = get_columns(table)
+    if column_names == 0:
+        return "Table does not exist."
+
+    ##check if the table and province are valid
+    if result == 0:
+        return jsonify(f"Province({province}) is invalid")
+
+    result = list(result)
+    ##formats the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
