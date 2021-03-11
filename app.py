@@ -66,8 +66,10 @@ def start_up():
     functions = "For the list of tables: http://[domain]/tables\n"
     functions += "For a full query of a specified table: http://[domain]/tables/[table]\n"
     functions +=  "For a list of columns in a specified table: http://[domain]/tables/[table]/attributes\n"
-    functions += "For the results of a query filtered by province: http://[domain]/tables/[table]/[province]"
-
+    functions += "For the results of a query filtered by province: http://[domain]/tables/[table]/[province]\n"
+    functions += "For the hourly transfers between a specified province and US state over a specified year: http://[domain]/tables/international_transfers/[year]_[province]_[state]\n"
+    functions += "For the hourly transfers between two provinces over a specified year: http://[domain]/tables/interprovincial_transfers/[year]_[province]_[province]\n"
+    functions += "For the hourly demand in a specified province: http://[domain]/tables/provincial_demand/[year]_[province]"
     return jsonify(welcome_msg + functions)
 
 ##Returns a list of the tables in the DB
@@ -285,7 +287,7 @@ def return_international_hourly_transfers(year, province, state):
     
     result = send_query(query)
     if result == 0:
-        return jsonify(f"There are no transfers available between {province} and {state} ({year})")
+        return jsonify(f"There are no transfers available between {province} and {state} during that year ({year})")
     
     column_names = get_columns("international_transfers")
 
@@ -308,7 +310,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     
     result = send_query(query)
     if result == 0:
-        return jsonify(f"There are no transfers between {province_1} and {province_2}")
+        return jsonify(f"There are no transfers between {province_1} and {province_2} during that year ({year})")
     
     column_names = get_columns("interprovincial_transfers")
 
@@ -330,7 +332,7 @@ def return_provincial_hourly_demand(year, province):
     
     result = send_query(query)
     if result == 0:
-        return jsonify(f"Invalid province code ({province}) or invalid year ({year})")
+        return jsonify(f"Invalid province code ({province}) or year unavailable ({year})")
     
     column_names = get_columns("provincial_demand")
 
