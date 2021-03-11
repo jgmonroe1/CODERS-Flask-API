@@ -208,6 +208,8 @@ def return_ref(key):
 ##Returns the specified table based on Province
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
+    if table in ("cpi_can","intertie_all","intertie_prov","generation_costs","reference_list"):
+        return jsonify("This table does not have a province attribute")
     ##query for substations joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -272,6 +274,75 @@ def return_based_on_prov(table, province):
         return jsonify("Table is empty.")
 
     return jsonify(result)
+
+##Returns the transfers between a specified province and US state
+@app.route('/tables/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
+def return_international_hourly_transfers(year, province, state):
+    query = f"SELECT * FROM international_transfers \
+                WHERE province = '{province}' AND \
+                us_state = '{state}' AND \
+                local_time LIKE '{year}%'"
+    
+    result = send_query(query)
+    if result == 0:
+        return jsonify(f"There are no transfers available between {province} and {state} ({year})")
+    
+    column_names = get_columns("international_transfers")
+
+    result = list(result)
+    ##formats the list to "'column_name': 'value'"
+    for row_idx,row in enumerate(result):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        result[row_idx] = row
+    return jsonify(result)
+
+##Returns the transfers between two specified provinces
+@app.route('/tables/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
+def return_interprovincial_hourly_transfer(year, province_1, province_2):
+    query = f"SELECT * FROM interprovincial_transfers \
+                WHERE province_1 = '{province_1}' AND \
+                province_2 = '{province_2}' AND \
+                local_time LIKE '{year}%';"
+    
+    result = send_query(query)
+    if result == 0:
+        return jsonify(f"There are no transfers between {province_1} and {province_2}")
+    
+    column_names = get_columns("interprovincial_transfers")
+
+    result = list(result)
+    ##formats the list to "'column_name': 'value'"
+    for row_idx,row in enumerate(result):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        result[row_idx] = row
+    return jsonify(result)
+
+##Returns the demand in a specified province
+@app.route('/tables/provincial_demand/<int:year>_<string:province>', methods=['GET'])
+def return_provincial_hourly_demand(year, province):
+    query = f"SELECT * FROM provincial_demand \
+                WHERE province = '{province}' AND \
+                local_time LIKE '{year}%'"
+    
+    result = send_query(query)
+    if result == 0:
+        return jsonify(f"Invalid province code ({province}) or invalid year ({year})")
+    
+    column_names = get_columns("provincial_demand")
+
+    result = list(result)
+    ##formats the list to "'column_name': 'value'"
+    for row_idx,row in enumerate(result):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        result[row_idx] = row
+    return jsonify(result)
+
 
 if __name__ == '__main__':
     #app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
