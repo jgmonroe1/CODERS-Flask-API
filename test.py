@@ -2,8 +2,8 @@ import requests
 
 BASE = "http://127.0.0.1:5000/"
 
-# response = requests.get(BASE)
-# print(response.json())
+response = requests.get(BASE)
+print(response.json())
 
 # print("####Reference Test#####")
 # response = requests.get(BASE + "/tables/reference-list/1")
@@ -30,20 +30,20 @@ BASE = "http://127.0.0.1:5000/"
 #     print(row)
 #     break
 
-print("\n####International Transfers Test####")
-response = requests.get(BASE + "/tables/international_transfers/2018_AB_Montana")
-for row in response.json():
-    print(row)
-    break
+# print("\n####International Transfers Test####")
+# response = requests.get(BASE + "/tables/international_transfers/2018_AB_Montana")
+# for row in response.json():
+#     print(row)
+#     break
 
-print("\n####Interprovincial Transfers Test####")
-response = requests.get(BASE + "/tables/interprovincial_transfers/2018_AB_SK")
-for row in response.json():
-    print(row)
-    break
+# print("\n####Interprovincial Transfers Test####")
+# response = requests.get(BASE + "/tables/interprovincial_transfers/2018_AB_SK")
+# for row in response.json():
+#     print(row)
+#     break
 
-print("\n####Provincial Demand Test####")
-response = requests.get(BASE + "/tables/provincial_demand/2018_AB")
-for row in response.json():
-    print(row)
-    break
+# print("\n####Provincial Demand Test####")
+# response = requests.get(BASE + "/tables/provincial_demand/2018_AB")
+# for row in response.json():
+#     print(row)
+#     break
