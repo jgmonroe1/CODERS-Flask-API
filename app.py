@@ -100,7 +100,7 @@ def show_db_tables():
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
     if table not in accessible_tables:
-        return jsonify("Table does not exist")
+        return jsonify("Table does not exist.")
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
         table = "nodes"
@@ -164,7 +164,7 @@ def return_table(table):
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
     if table not in accessible_tables:
-        return jsonify("Table does not exist")
+        return jsonify("Table does not exist.")
     if table == "junctions":
         table = "nodes"
     
@@ -180,7 +180,7 @@ def return_ref(key):
     source = send_query(query)
     #check if the source was found
     if source == 0:
-        return jsonify("Key not found")
+        return jsonify("ID not found")
     table = "reference_list"
 
     ##get the column names from the reference list
@@ -202,7 +202,7 @@ def return_ref(key):
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
     if table not in accessible_tables:
-        return jsonify("Table does not exist")
+        return jsonify("Table does not exist.")
     ##query for substations joined on nodes
     if table == "interties":
         query = f"SELECT \
