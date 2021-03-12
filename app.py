@@ -15,6 +15,23 @@ app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
 
+##the list of tables the user can request
+accessible_tables = ("generators",
+                    "substations",
+                    "transmission_lines",
+                    "storage_batteries",
+                    "interties",
+                    "distribution_transfers",
+                    "contribution_transfers",
+                    "generation_costs",
+                    "international_transfers",
+                    "interprovincial_transfers",
+                    "provincial_demand",
+                    "intertie_all",
+                    "intertie_provincial",
+                    "cpi_can",
+                    "reference_list")
+
 ##Executes the query to the database
 def send_query(query):
     cur = mysql.connection.cursor()
@@ -77,33 +94,17 @@ def start_up():
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
-    tables = ["generators",
-                "substations",
-                "transmission_lines",
-                "storage_batteries",
-                "interties",
-                "distribution_transfers",
-                "contribution_transfers",
-                "generation_costs",
-                "international_transfers",
-                "interprovincial_transfers",
-                "provincial_transfers",
-                "intertie_all",
-                "intertie_provincial",
-                "cpi_can",
-                "reference_list"]
-
-    return jsonify(tables)
+    return jsonify(accessible_tables)
 
 ##Returns the full table 
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
+    if table not in accessible_tables:
+        return jsonify("Table does not exist")
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE node_type = 'JCT';"
-        if column_names == 0:
-            return jsonify("Table does not exist.")
 
     ##Join the substation on the nodes
     elif table == "substations":
@@ -143,18 +144,12 @@ def return_table(table):
     else:
         query = f"SELECT * FROM {table};"
         ##get the columns from the specified table
-        column_names = get_columns(table)
-        if column_names == 0:
-            return jsonify("Table does not exist.")
     
     column_names = get_columns(table)
     
     ##send the query
     result = send_query(query)
 
-    ##the table name is incorrect
-    if result == 0:
-        return  jsonify("Table is empty.")
     result = list(result)
     ##formats the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
@@ -162,24 +157,18 @@ def return_table(table):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-
-    ##Check if the table is empty
-    if len(result) == 0:
-        return jsonify("Table is empty.")
         
     return jsonify(result)
 
 ##Returns the columns from a specified table
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
+    if table not in accessible_tables:
+        return jsonify("Table does not exist")
     if table == "junctions":
         table = "nodes"
     
     attributes = get_columns(table)
-
-    ##check if table name is incorrect
-    if attributes == 0:
-        return jsonify("Table does not exist")
 
     return jsonify(attributes)
     
@@ -212,8 +201,8 @@ def return_ref(key):
 ##Returns the specified table based on Province
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
-    if table in ("cpi_can","intertie_all","intertie_prov","generation_costs","reference_list"):
-        return jsonify("This table does not have a province attribute")
+    if table not in accessible_tables:
+        return jsonify("Table does not exist")
     ##query for substations joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -253,13 +242,13 @@ def return_based_on_prov(table, province):
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE province = '{province}' \
                 AND node_type = 'JCT';"
-    
+    else:
+        return jsonify("This table does not have a province attribute")
+
     result = send_query(query)
 
     ##get the column names
     column_names = get_columns(table)
-    if column_names == 0:
-        return "Table does not exist."
 
     ##check if the table and province are valid
     if result == 0:
@@ -272,10 +261,6 @@ def return_based_on_prov(table, province):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-    
-    ##Check if the table is empty
-    if len(result) == 0:
-        return jsonify("Table is empty.")
 
     return jsonify(result)
 
@@ -288,7 +273,7 @@ def return_international_hourly_transfers(year, province, state):
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
-    if result == 0:
+    if len(result) == 0:
         return jsonify(f"There are no transfers available between {province} and {state} during that year ({year})")
     
     column_names = get_columns("international_transfers")
@@ -311,7 +296,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
                 local_time LIKE '{year}%';"
     
     result = send_query(query)
-    if result == 0:
+    if len(result) == 0:
         return jsonify(f"There are no transfers between {province_1} and {province_2} during that year ({year})")
     
     column_names = get_columns("interprovincial_transfers")
@@ -333,7 +318,7 @@ def return_provincial_hourly_demand(year, province):
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
-    if result == 0:
+    if len(result) == 0:
         return jsonify(f"Invalid province code ({province}) or year unavailable ({year})")
     
     column_names = get_columns("provincial_demand")
