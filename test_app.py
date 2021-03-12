@@ -19,9 +19,13 @@ class TestApp(unittest.TestCase):
 
 	def test_return_table_wrong_table(self):
 		response = requests.get(BASE+"/tables/not_a_table")
-		print(response.json())
 		response_string = response.json()
 		self.assertEqual(response_string,"Table does not exist.")
+
+	def test_return_ref_wrong_id(self):
+		response = requests.get(BASE+"/tables/reference_list/wrong_id")
+		response_string = response.json()
+		self.assertEqual(response_string, "ID must be an integer.")
 
 if __name__ == '__main__':
 	unittest.main()
