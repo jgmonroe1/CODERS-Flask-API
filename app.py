@@ -243,6 +243,8 @@ def return_based_on_prov(table, province):
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE province = '{province}' \
                 AND node_type = 'JCT';"
+    elif table in ("generators","transmission_lines","storage_batteries"):
+        query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
         return jsonify("This table does not have a province attribute")
 
