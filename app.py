@@ -175,18 +175,19 @@ def return_columns(table):
 ##Returns the reference from the given reference key
 @app.route('/tables/reference-list/<int:key>', methods=['GET'])
 def return_ref(key):
+    if key < 0:
+        return jsonify("ID must be a positive integer.")
+
     ##query the ref list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
     #check if the source was found
     if source == 0:
-        return jsonify("ID not found")
+        return jsonify("ID not found.")
     table = "reference_list"
 
     ##get the column names from the reference list
     column_names = get_columns(table)
-    if column_names == 0:
-        return "Table does not exist."
     
     ##Format the list to "column_name: value"
     source = list(source)
