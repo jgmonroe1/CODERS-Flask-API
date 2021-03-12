@@ -22,11 +22,6 @@ class TestApp(unittest.TestCase):
 		response_string = response.json()
 		self.assertEqual(response_string,"Table does not exist.")
 
-	def test_return_ref_not_int(self):
-		response = requests.get(BASE+"/tables/reference_list/not_int")
-		response_string = response.json()
-		self.assertEqual(response_string, "ID must be an integer.")
-
 	def test_return_ref_negative(self):
 		response = requests.get(BASE+"/tables/reference_list/-123")
 		response_string = response.json()
