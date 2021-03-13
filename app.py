@@ -3,6 +3,13 @@ from flask_mysqldb import MySQL
 import sys
 import yaml
 import os
+import json
+import decimal
+
+
+class Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, decimal.Decimal): return float(obj)
 
 app = Flask(__name__)
 
@@ -94,7 +101,7 @@ def start_up():
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
-    return jsonify(accessible_tables)
+    return json.dumps(accessible_tables, cls= Encoder)
 
 ##Returns the full table 
 @app.route('/tables/<string:table>', methods=['GET'])
@@ -149,7 +156,6 @@ def return_table(table):
     
     ##send the query
     result = send_query(query)
-
     result = list(result)
     ##formats the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
@@ -157,8 +163,8 @@ def return_table(table):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-        
-    return jsonify(result)
+
+    return json.dumps(result, cls= Encoder)#jsonify(result)
 
 ##Returns the columns from a specified table
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
@@ -170,8 +176,8 @@ def return_columns(table):
     
     attributes = get_columns(table)
 
-    return jsonify(attributes)
-    
+    return json.dumps(attributes, cls= Encoder)
+
 ##Returns the reference from the given reference key
 @app.route('/tables/reference-list/<int:key>', methods=['GET'])
 def return_ref(key):
@@ -197,7 +203,7 @@ def return_ref(key):
             row[i] = {column_names[i]: column}    
         source[row_idx] = row
     
-    return jsonify(source)
+    return json.dumps(source, cls= Encoder)
 
 ##Returns the specified table based on Province
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
@@ -265,7 +271,7 @@ def return_based_on_prov(table, province):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
 
-    return jsonify(result)
+    return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between a specified province and US state
 @app.route('/tables/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
@@ -288,7 +294,7 @@ def return_international_hourly_transfers(year, province, state):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-    return jsonify(result)
+    return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between two specified provinces
 @app.route('/tables/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
@@ -311,7 +317,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-    return jsonify(result)
+    return json.dumps(result, cls= Encoder)
 
 ##Returns the demand in a specified province
 @app.route('/tables/provincial_demand/<int:year>_<string:province>', methods=['GET'])
@@ -333,7 +339,7 @@ def return_provincial_hourly_demand(year, province):
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
-    return jsonify(result)
+    return json.dumps(result, cls= Encoder)
 
 
 if __name__ == '__main__':
