@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from flask_mysqldb import MySQL
 import sys
 import yaml
@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 ##Configure db
 db = yaml.load(open('db.yaml'), Loader=yaml.FullLoader)
-app.config['MYSQL_HOST'] = db['mysql_host']
+app.config['MYSQL_HOST'] = db['mysql_host'] #host.docker.internal
 app.config['MYSQL_USER'] = db['mysql_user']
 app.config['MYSQL_PASSWORD'] = db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
@@ -102,15 +102,14 @@ def start_up():
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
-    
     return json.dumps(accessible_tables, cls= Encoder)
 
 ##Returns the full table 
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
-    
     if table not in accessible_tables:
-        return jsonify("404 Not Found: Table does not exist.")
+        status_code = Response(status=404)
+        return status_code
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
         table = "nodes"
@@ -172,9 +171,9 @@ def return_table(table):
 ##Returns the columns from a specified table
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
-    
     if table not in accessible_tables:
-        return jsonify("404 Not Found: Table does not exist.")
+        status_code = Response(status=404)
+        return status_code
     if table == "junctions":
         table = "nodes"
     
@@ -183,18 +182,19 @@ def return_columns(table):
     return json.dumps(attributes, cls= Encoder)
 
 ##Returns the reference from the given reference key
-@app.route('/tables/reference-list/<int:key>', methods=['GET'])
+@app.route('/tables/reference_list/<int:key>', methods=['GET'])
 def return_ref(key):
-    
     if key < 0:
-        return jsonify("404 Not Found: ID must be a positive integer.")
+        status_code = Response(status=404)
+        return status_code
 
     ##query the ref list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
     #check if the source was found
     if source == 0:
-        return jsonify("404 Not Found: ID not found.")
+        status_code = Response(status=404)
+        return status_code
     table = "reference_list"
 
     ##get the column names from the reference list
@@ -213,9 +213,9 @@ def return_ref(key):
 ##Returns the specified table based on Province
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
-    
     if table not in accessible_tables:
-        return jsonify("404 Not Found: Table does not exist.")
+        status_code = Response(status=404)
+        return status_code
     ##query for substations joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -258,7 +258,8 @@ def return_based_on_prov(table, province):
     elif table in ("generators","transmission_lines","storage_batteries"):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
-        return jsonify("404 Not Found: This table does not have a province attribute")
+        status_code = Response(status=404)
+        return status_code
 
     result = send_query(query)
 
@@ -267,7 +268,8 @@ def return_based_on_prov(table, province):
 
     ##check if the table and province are valid
     if result == 0:
-        return jsonify(f"404 Not found: Province({province}) is invalid")
+        status_code = Response(status=404)
+        return status_code
 
     result = list(result)
     ##formats the list to "'column_name': 'value'"
@@ -290,7 +292,8 @@ def return_international_hourly_transfers(year, province, state):
     
     result = send_query(query)
     if len(result) == 0:
-        return jsonify(f"404 Not Found: There are no transfers available between {province} and {state} during that year ({year})")
+        status_code = Response(status=404)
+        return status_code
     
     column_names = get_columns("international_transfers")
 
@@ -314,7 +317,8 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     
     result = send_query(query)
     if len(result) == 0:
-        return jsonify(f"404 Not Found: There are no transfers between {province_1} and {province_2} during that year ({year})")
+        status_code = Response(status=404)
+        return status_code
     
     column_names = get_columns("interprovincial_transfers")
 
@@ -337,7 +341,8 @@ def return_provincial_hourly_demand(year, province):
     
     result = send_query(query)
     if len(result) == 0:
-        return jsonify(f"404 Not Found: Invalid province code ({province}) or year unavailable ({year})")
+        status_code = Response(status=404)
+        return status_code
     
     column_names = get_columns("provincial_demand")
 
@@ -352,5 +357,5 @@ def return_provincial_hourly_demand(year, province):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    #app.run(debug=True)
+    #app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)
