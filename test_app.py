@@ -41,11 +41,30 @@ class TestApp(unittest.TestCase):
 		response = requests.get(BASE+"/tables/not_a_table/attributes")
 		response_code = response.status_code
 		self.assertEqual(response_code, 404)
+	#return_ref is quite difficult to test as we cant garentee that given ref_id 
+	#is in the system. Therefor testing the response from a good or bad ID is difficult
+	#should try find a better way
+	def test_return_ref_zero(self):
+		response = requests.get(BASE+"/tables/reference_list/0")
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)
 
 	def test_return_ref_negative(self):
 		response = requests.get(BASE+"/tables/reference_list/-123")
 		response_code = response.status_code
 		self.assertEqual(response_code, 404)
+
+	def test_return_based_on_prov(self):
+		response = requests.get(BASE+"/tables/substations/NB")
+		response_list = response.json()
+		self.assertEqual(type(response_list),type([1,1]))
+
+	def test_return_based_on_prov(self):
+		response = requests.get(BASE+"/tables/not_a_table/NB")
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)
+
+	
 
 if __name__ == '__main__':
 	unittest.main()
