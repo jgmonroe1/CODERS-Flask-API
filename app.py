@@ -88,6 +88,7 @@ def get_columns(table):
 ##Initial connection message
 @app.route('/', methods=['GET'])
 def start_up():
+    
     welcome_msg = "Welcome to the CODERS database!\n"
     functions = "For the list of tables: http://[domain]/tables\n"
     functions += "For a full query of a specified table: http://[domain]/tables/[table]\n"
@@ -101,11 +102,13 @@ def start_up():
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
 def show_db_tables():
+    
     return json.dumps(accessible_tables, cls= Encoder)
 
 ##Returns the full table 
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
+    
     if table not in accessible_tables:
         return jsonify("404 Not Found: Table does not exist.")
     ##if the table is sub, jct, or int, join the subtable on the node table
@@ -169,6 +172,7 @@ def return_table(table):
 ##Returns the columns from a specified table
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
+    
     if table not in accessible_tables:
         return jsonify("404 Not Found: Table does not exist.")
     if table == "junctions":
@@ -181,8 +185,9 @@ def return_columns(table):
 ##Returns the reference from the given reference key
 @app.route('/tables/reference-list/<int:key>', methods=['GET'])
 def return_ref(key):
+    
     if key < 0:
-        return jsonify("400 Bad Request: ID must be a positive integer.")
+        return jsonify("404 Not Found: ID must be a positive integer.")
 
     ##query the ref list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
@@ -208,6 +213,7 @@ def return_ref(key):
 ##Returns the specified table based on Province
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
+    
     if table not in accessible_tables:
         return jsonify("404 Not Found: Table does not exist.")
     ##query for substations joined on nodes
@@ -252,7 +258,7 @@ def return_based_on_prov(table, province):
     elif table in ("generators","transmission_lines","storage_batteries"):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
-        return jsonify("400 Bad Request: This table does not have a province attribute")
+        return jsonify("404 Not Found: This table does not have a province attribute")
 
     result = send_query(query)
 
@@ -276,6 +282,7 @@ def return_based_on_prov(table, province):
 ##Returns the transfers between a specified province and US state
 @app.route('/tables/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
 def return_international_hourly_transfers(year, province, state):
+    
     query = f"SELECT * FROM international_transfers \
                 WHERE province = '{province}' AND \
                 us_state = '{state}' AND \
@@ -299,6 +306,7 @@ def return_international_hourly_transfers(year, province, state):
 ##Returns the transfers between two specified provinces
 @app.route('/tables/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
 def return_interprovincial_hourly_transfer(year, province_1, province_2):
+    
     query = f"SELECT * FROM interprovincial_transfers \
                 WHERE province_1 = '{province_1}' AND \
                 province_2 = '{province_2}' AND \
@@ -322,6 +330,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
 ##Returns the demand in a specified province
 @app.route('/tables/provincial_demand/<int:year>_<string:province>', methods=['GET'])
 def return_provincial_hourly_demand(year, province):
+    
     query = f"SELECT * FROM provincial_demand \
                 WHERE province = '{province}' AND \
                 local_time LIKE '{year}%'"
@@ -343,5 +352,5 @@ def return_provincial_hourly_demand(year, province):
 
 
 if __name__ == '__main__':
-    #app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    #app.run(debug=True)
