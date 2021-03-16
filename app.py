@@ -120,8 +120,6 @@ def show_db_tables():
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
     if table not in accessible_tables:
-        #status_code = Response(status=404)
-        #return status_code
         raise InvalidUsage('Table not recognized',status_code=404)
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
@@ -185,8 +183,8 @@ def return_table(table):
 @app.route('/tables/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
     if table not in accessible_tables:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Table not recognized',status_code=404)
+
     if table == "junctions":
         table = "nodes"
     
@@ -198,16 +196,14 @@ def return_columns(table):
 @app.route('/tables/reference_list/<int:key>', methods=['GET'])
 def return_ref(key):
     if key < 0:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Key must be a positive integer', status_code=400)
 
     ##query the ref list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
     #check if the source was found
     if source == 0:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Key was not associated with any reference', status_code=404)
     table = "reference_list"
 
     ##get the column names from the reference list
@@ -227,8 +223,8 @@ def return_ref(key):
 @app.route('/tables/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
     if table not in accessible_tables:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Table not recognized',status_code=404)
+
     ##query for substations joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -271,8 +267,7 @@ def return_based_on_prov(table, province):
     elif table in ("generators","transmission_lines","storage_batteries"):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Table has no province attribute to filter by',status_code=400)
 
     result = send_query(query)
 
@@ -280,9 +275,8 @@ def return_based_on_prov(table, province):
     column_names = get_columns(table)
 
     ##check if the table and province are valid
-    if result == 0:
-        status_code = Response(status=404)
-        return status_code
+    if len(result) == 0:
+       raise InvalidUsage('Invalid table and province',status_code=400)
 
     result = list(result)
     ##formats the list to "'column_name': 'value'"
@@ -305,8 +299,7 @@ def return_international_hourly_transfers(year, province, state):
     
     result = send_query(query)
     if len(result) == 0:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Invalid province, state, year combination',status_code=400)
     
     column_names = get_columns("international_transfers")
 
@@ -330,8 +323,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     
     result = send_query(query)
     if len(result) == 0:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Invalid province, province, year combination',status_code=400)
     
     column_names = get_columns("interprovincial_transfers")
 
@@ -354,8 +346,7 @@ def return_provincial_hourly_demand(year, province):
     
     result = send_query(query)
     if len(result) == 0:
-        status_code = Response(status=404)
-        return status_code
+        raise InvalidUsage('Invalid province and year combination',status_code=400)
     
     column_names = get_columns("provincial_demand")
 
