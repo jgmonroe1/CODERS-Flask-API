@@ -54,7 +54,7 @@ class TestApp(unittest.TestCase):
 	def test_return_ref_negative(self):
 		response = requests.get(BASE+"/tables/reference_list/-123")
 		response_code = response.status_code
-		self.assertEqual(response_code, 404)
+		self.assertEqual(response_code, 400)
 
 	def test_return_based_on_prov(self):
 		response = requests.get(BASE+"/tables/substations/NB")
@@ -69,7 +69,7 @@ class TestApp(unittest.TestCase):
 	def test_return_based_on_prov_wrong_prov(self):
 		response = requests.get(BASE+"/tables/generators/XX")
 		response_code = response.status_code
-		self.assertEqual(response_code, 404)	
+		self.assertEqual(response_code, 400)	
 
 
 if __name__ == '__main__':
