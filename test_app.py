@@ -59,12 +59,15 @@ class TestApp(unittest.TestCase):
 		response_list = response.json()
 		self.assertEqual(type(response_list),type([1,1]))
 
-	def test_return_based_on_prov(self):
+	def test_return_based_on_prov_wrong_table(self):
 		response = requests.get(BASE+"/tables/not_a_table/NB")
 		response_code = response.status_code
 		self.assertEqual(response_code, 404)
 
-	
+	def test_return_based_on_prov_wrong_prov(self):
+		response = requests.get(BASE+"/tables/generators/XX")
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)	
 
 if __name__ == '__main__':
 	unittest.main()
