@@ -71,8 +71,6 @@ class TestApp(unittest.TestCase):
 		response_code = response.status_code
 		self.assertEqual(response_code, 404)	
 
-	def test_return_international_hourly_transfers(self):
-		response = requests.get(BASE+"/tables/international_transfers/2019_")
 
 if __name__ == '__main__':
 	unittest.main()
