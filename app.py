@@ -4,12 +4,9 @@ import sys
 import yaml
 import os
 import json
-import decimal
 
-
-class Encoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, decimal.Decimal): return float(obj)
+from classes.invalidUsage import InvalidUsage
+from classes.encoder import Encoder
 
 app = Flask(__name__)
 
@@ -22,6 +19,16 @@ app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
 
+#Error Handling
+#====================================================================
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+#Defining Variables
+#====================================================================
 ##the list of tables the user can request
 accessible_tables = ("generators",
                     "substations",
@@ -40,6 +47,8 @@ accessible_tables = ("generators",
                     "cpi_can",
                     "reference_list")
 
+#Helper Methods
+#====================================================================
 ##Executes the query to the database
 def send_query(query):
     cur = mysql.connection.cursor()
@@ -86,6 +95,8 @@ def get_columns(table):
             columns.append(column[0])
     return columns
 
+#API Routes
+#====================================================================
 ##Initial connection message
 @app.route('/', methods=['GET'])
 def start_up():
@@ -109,8 +120,9 @@ def show_db_tables():
 @app.route('/tables/<string:table>', methods=['GET'])
 def return_table(table):
     if table not in accessible_tables:
-        status_code = Response(status=404)
-        return status_code
+        #status_code = Response(status=404)
+        #return status_code
+        raise InvalidUsage('Table not not recognized',status_code=404)
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
         table = "nodes"
