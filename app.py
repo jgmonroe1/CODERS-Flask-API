@@ -122,7 +122,7 @@ def return_table(table):
     if table not in accessible_tables:
         #status_code = Response(status=404)
         #return status_code
-        raise InvalidUsage('Table not not recognized',status_code=404)
+        raise InvalidUsage('Table not recognized',status_code=404)
     ##if the table is sub, jct, or int, join the subtable on the node table
     if table == "junctions":
         table = "nodes"
