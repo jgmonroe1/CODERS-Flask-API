@@ -49,6 +49,15 @@ accessible_tables = ("generators",
 
 #Helper Methods
 #====================================================================
+#Checks if string is an int
+#taken from: https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 ##Executes the query to the database
 def send_query(query):
     cur = mysql.connection.cursor()
@@ -94,6 +103,8 @@ def get_columns(table):
         for column in results:
             columns.append(column[0])
     return columns
+
+
 
 #API Routes
 #====================================================================
@@ -193,9 +204,13 @@ def return_columns(table):
     return json.dumps(attributes, cls= Encoder)
 
 ##Returns the reference from the given reference key
-@app.route('/tables/reference_list/<int:key>', methods=['GET'])
+@app.route('/tables/reference_list/<string:key>', methods=['GET'])
 def return_ref(key):
-    if key < 0:
+    
+    if not RepresentsInt(key):
+        raise InvalidUsage('Key must be an integer', status_code=400)
+
+    if int(key) <= 0:
         raise InvalidUsage('Key must be a positive integer', status_code=400)
 
     ##query the ref list
