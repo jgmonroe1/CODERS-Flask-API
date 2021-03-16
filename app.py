@@ -202,7 +202,7 @@ def return_ref(key):
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
     #check if the source was found
-    if source == 0:
+    if len(source) == 0:
         raise InvalidUsage('Key was not associated with any reference', status_code=404)
     table = "reference_list"
 
