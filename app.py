@@ -202,7 +202,9 @@ def return_ref(key):
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
     #check if the source was found
-    if len(source) == 0:
+    if source == 0:
+        raise InvalidUsage('Key was invalid', status_code=404)
+    elif len(source) == 0:
         raise InvalidUsage('Key was not associated with any reference', status_code=404)
     table = "reference_list"
 
@@ -275,9 +277,10 @@ def return_based_on_prov(table, province):
     column_names = get_columns(table)
 
     ##check if the table and province are valid
-    if len(result) == 0:
-       raise InvalidUsage('Invalid table and province',status_code=400)
-
+    if result == 0:
+        raise InvalidUsage('Invalid province',status_code=400)
+    elif len(result) == 0:
+        raise InvalidUsage('Invalid province',status_code=400)
     result = list(result)
     ##formats the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
@@ -298,9 +301,11 @@ def return_international_hourly_transfers(year, province, state):
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
-    if len(result) == 0:
+    if result == 0:
         raise InvalidUsage('Invalid province, state, year combination',status_code=400)
-    
+    elif len(result) == 0:
+        raise InvalidUsage('Invalid province, state, year combination',status_code=400)
+
     column_names = get_columns("international_transfers")
 
     result = list(result)
@@ -322,9 +327,10 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
                 local_time LIKE '{year}%';"
     
     result = send_query(query)
-    if len(result) == 0:
+    if result == 0:
         raise InvalidUsage('Invalid province, province, year combination',status_code=400)
-    
+    elif len(result) == 0:
+        raise InvalidUsage('Invalid province, province, year combination',status_code=400)
     column_names = get_columns("interprovincial_transfers")
 
     result = list(result)
@@ -345,9 +351,10 @@ def return_provincial_hourly_demand(year, province):
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
-    if len(result) == 0:
+    if result == 0:
         raise InvalidUsage('Invalid province and year combination',status_code=400)
-    
+    elif len(result) == 0:
+        raise InvalidUsage('Invalid province and year combination',status_code=400)
     column_names = get_columns("provincial_demand")
 
     result = list(result)
