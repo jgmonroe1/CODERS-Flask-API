@@ -25,7 +25,9 @@ class TestApp(unittest.TestCase):
 	def test_return_table_wrong_table(self):
 		response = requests.get(BASE+"/tables/not_a_table")
 		response_code = response.status_code
+		response_dict = response.json()
 		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'],'Table not recognized')
 
 	def test_return_columns(self):
 		response = requests.get(BASE+"/tables/substations/attributes")
@@ -68,6 +70,9 @@ class TestApp(unittest.TestCase):
 		response = requests.get(BASE+"/tables/generators/XX")
 		response_code = response.status_code
 		self.assertEqual(response_code, 404)	
+
+	def test_return_international_hourly_transfers(self):
+		response = requests.get(BASE+"/tables/international_transfers/2019_")
 
 if __name__ == '__main__':
 	unittest.main()
