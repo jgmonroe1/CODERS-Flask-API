@@ -128,7 +128,7 @@ def show_db_tables():
     return json.dumps(accessible_tables, cls= Encoder)
 
 ##Returns the full table 
-@app.route('/tables/<string:table>', methods=['GET'])
+@app.route('/<string:table>', methods=['GET'])
 def return_table(table):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
@@ -191,7 +191,7 @@ def return_table(table):
     return json.dumps(result, cls= Encoder)#jsonify(result)
 
 ##Returns the columns from a specified table
-@app.route('/tables/<string:table>/attributes', methods=['GET'])
+@app.route('/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
@@ -204,7 +204,7 @@ def return_columns(table):
     return json.dumps(attributes, cls= Encoder)
 
 ##Returns the reference from the given reference key
-@app.route('/tables/reference_list/<string:key>', methods=['GET'])
+@app.route('/reference_list/<string:key>', methods=['GET'])
 def return_ref(key):
     
     if not RepresentsInt(key):
@@ -237,7 +237,7 @@ def return_ref(key):
     return json.dumps(source, cls= Encoder)
 
 ##Returns the specified table based on Province
-@app.route('/tables/<string:table>/<string:province>', methods=['GET'])
+@app.route('/<string:table>/<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
@@ -307,7 +307,7 @@ def return_based_on_prov(table, province):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between a specified province and US state
-@app.route('/tables/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
+@app.route('/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
 def return_international_hourly_transfers(year, province, state):
     
     query = f"SELECT * FROM international_transfers \
@@ -333,7 +333,7 @@ def return_international_hourly_transfers(year, province, state):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between two specified provinces
-@app.route('/tables/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
+@app.route('/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
 def return_interprovincial_hourly_transfer(year, province_1, province_2):
     
     query = f"SELECT * FROM interprovincial_transfers \
@@ -358,7 +358,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the demand in a specified province
-@app.route('/tables/provincial_demand/<int:year>_<string:province>', methods=['GET'])
+@app.route('/provincial_demand/<int:year>_<string:province>', methods=['GET'])
 def return_provincial_hourly_demand(year, province):
     
     query = f"SELECT * FROM provincial_demand \
