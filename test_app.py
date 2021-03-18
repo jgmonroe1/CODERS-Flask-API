@@ -109,6 +109,19 @@ class TestApp(unittest.TestCase):
 		self.assertEqual(response_code, 200)
 		self.assertEqual(response_dict['message'],'No results found')
 
+	def test_return_generator_type_wrong_type(self):
+		response = requests.get(BASE+"/generators/province=NL&type=foo")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'Invalid generator type')
+
+	def test_return_generator_type_wrong_province(self):
+		response = requests.get(BASE+"/generators/province=FOO&type=hydro_daily")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 200)
+		self.assertEqual(response_dict['message'], 'No hydro_daily generators found in FOO')
 
 if __name__ == '__main__':
 	unittest.main()
