@@ -47,6 +47,15 @@ accessible_tables = ("generators",
                     "cpi_can",
                     "reference_list")
 
+gen_types = ("wind",
+            "gas",
+            "waste",
+            "coal",
+            "solar",
+            "hydro_run",
+            "hydro_daily",
+            "hydro_monthly")
+
 #Helper Methods
 #====================================================================
 #Checks if string is an int
@@ -64,7 +73,7 @@ def send_query(query):
     try:
         cur.execute(query)
         result = cur.fetchall()
-        return result
+        return list(result)
     except:
         return 0
 
@@ -111,7 +120,6 @@ def get_columns(table):
 ##Initial connection message
 @app.route('/', methods=['GET'])
 def start_up():
-    
     welcome_msg = "Welcome to the CODERS database!\n"
     functions = "For the list of tables: http://[domain]/tables\n"
     functions += "For a full query of a specified table: http://[domain]/tables/[table]\n"
@@ -130,14 +138,13 @@ def show_db_tables():
 ##Returns the full table 
 @app.route('/<string:table>', methods=['GET'])
 def return_table(table):
+    ## Check if the table exists
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-    ##if the table is sub, jct, or int, join the subtable on the node table
+    ##Join the subtables on the node table
     if table == "junctions":
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE node_type = 'JCT';"
-
-    ##Join the substation on the nodes
     elif table == "substations":
         query = f"SELECT \
                     n.name, \
@@ -153,8 +160,6 @@ def return_table(table):
                     n.notes \
                     FROM nodes n \
                     JOIN substations s ON n.node_code = s.sub_node_code;"
-        
-    ##Join the interties on the nodes
     elif table == "interties":
         query = f"SELECT \
                     n.name, \
@@ -170,64 +175,61 @@ def return_table(table):
                     n.notes \
                     FROM nodes n \
                     JOIN interties i ON n.node_code = i.int_node_code;"
-
-    ##If not a jct, sub, or int, query the table
+    ## Table is not substations, junctions, or interties
     else:
         query = f"SELECT * FROM {table};"
-        ##get the columns from the specified table
-    
+
+    ## Get the column names and send the query
     column_names = get_columns(table)
-    
-    ##send the query
     result = send_query(query)
-    result = list(result)
-    ##formats the list to "'column_name': 'value'"
+
+    ## Format the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
             row[i] = {column_names[i]: column}    
         result[row_idx] = row
 
-    return json.dumps(result, cls= Encoder)#jsonify(result)
+    return json.dumps(result, cls= Encoder)
 
 ##Returns the columns from a specified table
 @app.route('/<string:table>/attributes', methods=['GET'])
 def return_columns(table):
+    ## Check if the table exists
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-
+    
     if table == "junctions":
         table = "nodes"
     
+    ## Get the column names
     attributes = get_columns(table)
 
     return json.dumps(attributes, cls= Encoder)
 
 ##Returns the reference from the given reference key
-@app.route('/reference_list/<string:key>', methods=['GET'])
+@app.route('/reference_list/key=<string:key>', methods=['GET'])
 def return_ref(key):
-    
     if not RepresentsInt(key):
         raise InvalidUsage('Key must be an integer', status_code=400)
 
     if int(key) <= 0:
         raise InvalidUsage('Key must be a positive integer', status_code=400)
 
-    ##query the ref list
+    ## Query the reference list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
     source = send_query(query)
-    #check if the source was found
+
+    #Check if the source was found
     if source == 0:
         raise InvalidUsage('Key was invalid', status_code=404)
     elif len(source) == 0:
-        raise InvalidUsage('Key was not associated with any reference', status_code=404)
-    table = "reference_list"
-
-    ##get the column names from the reference list
-    column_names = get_columns(table)
+        raise InvalidUsage('Key was not associated with any reference', status_code=200)
     
-    ##Format the list to "column_name: value"
-    source = list(source)
+    ## Get the column names from the reference list
+    column_names = get_columns("reference_list")
+    
+    ## Format the list to "column_name: value"
     for row_idx,row in enumerate(source):
         row = list(row)
         for i,column in enumerate(row):
@@ -237,12 +239,12 @@ def return_ref(key):
     return json.dumps(source, cls= Encoder)
 
 ##Returns the specified table based on Province
-@app.route('/<string:table>/<string:province>', methods=['GET'])
+@app.route('/<string:table>/province=<string:province>', methods=['GET'])
 def return_based_on_prov(table, province):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
 
-    ##query for substations joined on nodes
+    ## Query interties joined on nodes
     if table == "interties":
         query = f"SELECT \
                     n.name, \
@@ -259,7 +261,7 @@ def return_based_on_prov(table, province):
                     FROM nodes n \
                     JOIN interties i ON n.node_code = i.int_node_code \
                     WHERE n.province = '{province}';"
-    ##query for junctions joined on nodes
+    ## Query for substations joined on nodes
     elif table == "substations":
         query = f"SELECT \
                     n.name, \
@@ -276,28 +278,29 @@ def return_based_on_prov(table, province):
                     FROM nodes n \
                     JOIN substations s ON n.node_code = s.sub_node_code \
                     WHERE n.province = '{province}';"
-    ##query only the junction types from the node table
+    ## Query only the junction types from the node table
     elif table == "junctions":
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE province = '{province}' \
                 AND node_type = 'JCT';"
+    ## Query for the rest of the tables
     elif table in ("generators","transmission_lines","storage_batteries"):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
-        raise InvalidUsage('Table has no province attribute to filter by',status_code=400)
+        raise InvalidUsage('Table has no province attribute',status_code=400)
 
     result = send_query(query)
 
-    ##get the column names
+    ## Get the column names
     column_names = get_columns(table)
 
-    ##check if the table and province are valid
+    ## Handling bad requests and empty tables
     if result == 0:
         raise InvalidUsage('Invalid province',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('Invalid province',status_code=400)
-    result = list(result)
-    ##formats the list to "'column_name': 'value'"
+        raise InvalidUsage('No results found',status_code=200)
+    
+    ## Format the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
@@ -306,25 +309,24 @@ def return_based_on_prov(table, province):
 
     return json.dumps(result, cls= Encoder)
 
-##Returns the transfers between a specified province and US state
-@app.route('/international_transfers/<int:year>_<string:province>_<string:state>', methods=['GET'])
+##Returns the transfers between a specified province and US region
+@app.route('/international_transfers/year=<int:year>&province<string:province>&us_region<string:state>', methods=['GET'])
 def return_international_hourly_transfers(year, province, state):
-    
     query = f"SELECT * FROM international_transfers \
                 WHERE province = '{province}' AND \
                 us_state = '{state}' AND \
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
+    ## Handling empty tables and bad requests
     if result == 0:
         raise InvalidUsage('Invalid province, state, year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('Invalid province, state, year combination',status_code=400)
+        raise InvalidUsage('No results found',status_code=200)
 
     column_names = get_columns("international_transfers")
 
-    result = list(result)
-    ##formats the list to "'column_name': 'value'"
+    ## Format the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
@@ -333,23 +335,23 @@ def return_international_hourly_transfers(year, province, state):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between two specified provinces
-@app.route('/interprovincial_transfers/<int:year>_<string:province_1>_<string:province_2>', methods=['GET'])
+@app.route('/interprovincial_transfers/year=<int:year>&province1=<string:province_1>&province2<string:province_2>', methods=['GET'])
 def return_interprovincial_hourly_transfer(year, province_1, province_2):
-    
     query = f"SELECT * FROM interprovincial_transfers \
                 WHERE province_1 = '{province_1}' AND \
                 province_2 = '{province_2}' AND \
                 local_time LIKE '{year}%';"
     
     result = send_query(query)
+
+    ## Handling empty tables and bad requests
     if result == 0:
         raise InvalidUsage('Invalid province, province, year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('Invalid province, province, year combination',status_code=400)
+        raise InvalidUsage('No results found',status_code=200)
     column_names = get_columns("interprovincial_transfers")
 
-    result = list(result)
-    ##formats the list to "'column_name': 'value'"
+    ## Format the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
@@ -358,22 +360,50 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the demand in a specified province
-@app.route('/provincial_demand/<int:year>_<string:province>', methods=['GET'])
+@app.route('/provincial_demand/year=<int:year>&province=<string:province>', methods=['GET'])
 def return_provincial_hourly_demand(year, province):
-    
     query = f"SELECT * FROM provincial_demand \
                 WHERE province = '{province}' AND \
                 local_time LIKE '{year}%'"
     
     result = send_query(query)
+    ## Handling bad requests
     if result == 0:
         raise InvalidUsage('Invalid province and year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('Invalid province and year combination',status_code=400)
+        raise InvalidUsage('No results found',status_code=200)
     column_names = get_columns("provincial_demand")
 
-    result = list(result)
-    ##formats the list to "'column_name': 'value'"
+    ## Format the list to "'column_name': 'value'"
+    for row_idx,row in enumerate(result):
+        row = list(row)
+        for i,column in enumerate(row):
+            row[i] = {column_names[i]: column}    
+        result[row_idx] = row
+    return json.dumps(result, cls= Encoder)
+
+##Returns generators filtered by generation type
+@app.route('/generators/province=<string:province>&type=<string:gen_type>', methods=['GET'])
+def return_generator_type(province, gen_type):
+    ## Handling unknown generator type
+    if gen_type not in gen_types:
+        raise InvalidUsage('Invalid generator type',status_code=404)
+    
+    query = f"SELECT * FROM generators \
+                WHERE gen_type_copper = '{gen_type}' AND \
+                province = '{province}';"
+    
+    result = send_query(query)
+
+    ## Handling bad requests and empty tables
+    if len(result) == 0:
+        raise InvalidUsage(f"No {gen_type} generators found in {province}", status_code=200)
+    elif result == 0:
+        raise InvalidUsage('Invalid generator type or province', status_code=400)
+
+    column_names = get_columns("generators")
+
+    ## Formats the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
         row = list(row)
         for i,column in enumerate(row):
