@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, Response
 from flask_mysqldb import MySQL
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import sys
 import yaml
 import os
@@ -18,6 +20,10 @@ app.config['MYSQL_PASSWORD'] = db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
+
+#Rate Limiter
+#====================================================================
+Limiter = Limiter(app,key_func=get_remote_address)
 
 #Error Handling
 #====================================================================
@@ -114,6 +120,7 @@ def get_columns(table):
 #====================================================================
 ##Initial connection message
 @app.route('/', methods=['GET'])
+@Limiter.limit('100 per second')
 def start_up():
     welcome_msg = "Welcome to the CODERS database!\n"
     functions = "For the list of tables:\n\
@@ -149,11 +156,13 @@ def return_filters():
 
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
+@Limiter.limit('100 per second')
 def show_db_tables():
     return json.dumps(accessible_tables, cls= Encoder)
 
 ##Returns the full table 
 @app.route('/<string:table>', methods=['GET'])
+@Limiter.limit('100 per second')
 def return_table(table):
     ## Check if the table exists
     if table not in accessible_tables:
@@ -239,6 +248,7 @@ def return_table(table):
 
 ##Returns the columns from a specified table
 @app.route('/<string:table>/attributes', methods=['GET'])
+@Limiter.limit('100 per second')
 def return_columns(table):
     ## Check if the table exists
     if table not in accessible_tables:
