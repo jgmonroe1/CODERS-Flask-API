@@ -121,23 +121,34 @@ def get_columns(table):
 @app.route('/', methods=['GET'])
 def start_up():
     welcome_msg = "Welcome to the CODERS database!\n"
-    functions = "For the list of tables:\n \
-                    http://[domain]/tables\n"
-    functions += "For a full query of a specified table:\n \
-                    http://[domain]/[table]\n"
-    functions += "For a list of columns in a specified table:\n \
-                    http://[domain]/[table]/attributes\n"
-    functions += "For the results of a query filtered by province:\n \
-                    http://[domain]/[table]/province=[province]\n"
-    functions += "For the hourly transfers between a specified province and US state over a specified year:\n\
-                    http://[domain]/international_transfers/year=[year]&province=[province]&us_region=[state]\n"
-    functions += "For the hourly transfers between two provinces over a specified year:\n \
-                    http://[domain]/interprovincial_transfers/year=[year]&province1=[province]&province2=[province]\n"
-    functions += "For the hourly demand in a specified province:\n \
-                    http://[domain]/provincial_demand/year=[year]&province=[province]"
-    functions += "For the generators filtered by province and generation type:\n \
-                    http://[domain]/generators/province=[province]&type=[generation type]"
+    functions = "For the list of tables:\n\
+                    http://[domain]/tables\n\
+                For a full query of a specified table:\n\
+                    http://[domain]/[table]\n\n\
+                For a list of columns in a specified table:\n\
+                    http://[domain]/[table]/attributes\n\n\
+                For the results of a query filtered by province:\n\
+                    http://[domain]/[table]/province=[province]\n\n\
+                For the hourly transfers between a specified province and US state over a specified year:\n\
+                    http://[domain]/international_transfers/year=[year]&province=[province]&us_region=[state]\n\n\
+                For the hourly transfers between two provinces over a specified year:\n\
+                    http://[domain]/interprovincial_transfers/year=[year]&province1=[province]&province2=[province]\n\n\
+                For the hourly demand in a specified province:\n\
+                    http://[domain]/provincial_demand/year=[year]&province=[province]\n\n\
+                For the generators filtered by province and generation type:\n\
+                    http://[domain]/generators/province=[province]&type=[generation type]\n".replace('  ','')
     return jsonify(welcome_msg + functions)
+
+##Returns the available filters
+@app.route('/filters', methods=['GET'])
+def return_filters():
+    filters = "Province: substations, generators, transmission_lines, junctions, interties, storage_batteries\n\
+                Province and Generation Type: generators\n\
+                Reference Key: reference_list\n\
+                Year, Province, and US Region: international_transfers\n\
+                Year, Province, and Province: interprovincial_transfers\n\
+                Year and Province: provincial_demand\n".replace('  ', '')
+    return jsonify(filters)
 
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
