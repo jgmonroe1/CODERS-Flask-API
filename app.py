@@ -45,7 +45,7 @@ accessible_tables = ("generators",
                     "intertie_all",
                     "intertie_provincial",
                     "cpi_can",
-                    "reference_list")
+                    "references")
 
 gen_types = ("wind",
             "gas",
@@ -122,21 +122,23 @@ def get_columns(table):
 def start_up():
     welcome_msg = "Welcome to the CODERS database!\n"
     functions = "For the list of tables:\n\
-                    http://[domain]/tables\n\
+                    http://[domain]/tables\n\n\
                 For a full query of a specified table:\n\
                     http://[domain]/[table]\n\n\
                 For a list of columns in a specified table:\n\
                     http://[domain]/[table]/attributes\n\n\
                 For the results of a query filtered by province:\n\
-                    http://[domain]/[table]/province=[province]\n\n\
+                    http://[domain]/[table]?province=[province]\n\n\
                 For the hourly transfers between a specified province and US state over a specified year:\n\
-                    http://[domain]/international_transfers/year=[year]&province=[province]&us_region=[state]\n\n\
+                    http://[domain]/international_transfers?year=[year]&province=[province]&us_region=[state]\n\n\
                 For the hourly transfers between two provinces over a specified year:\n\
-                    http://[domain]/interprovincial_transfers/year=[year]&province1=[province]&province2=[province]\n\n\
+                    http://[domain]/interprovincial_transfers?year=[year]&province1=[province]&province2=[province]\n\n\
                 For the hourly demand in a specified province:\n\
-                    http://[domain]/provincial_demand/year=[year]&province=[province]\n\n\
+                    http://[domain]/provincial_demand?year=[year]&province=[province]\n\n\
                 For the generators filtered by province and generation type:\n\
-                    http://[domain]/generators/province=[province]&type=[generation type]\n".replace('  ','')
+                    http://[domain]/generators?province=[province]&type=[generation_type]\n\n\
+                For locating a reference:\n\
+                    http://[domain]/references?key=[reference_key]\n".replace('  ','')
     return jsonify(welcome_msg + functions)
 
 ##Returns the available filters
@@ -144,7 +146,7 @@ def start_up():
 def return_filters():
     filters = "Province: substations, generators, transmission_lines, junctions, interties, storage_batteries\n\
                 Province and Generation Type: generators\n\
-                Reference Key: reference_list\n\
+                Reference Key: references\n\
                 Year, Province, and US Region: international_transfers\n\
                 Year, Province, and Province: interprovincial_transfers\n\
                 Year and Province: provincial_demand\n".replace('  ', '')
@@ -161,7 +163,35 @@ def return_table(table):
     ## Check if the table exists
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-    ##Join the subtables on the node table
+
+    ## Parse the request for different parameters
+    province = request.args.get('province')
+    reference_key = request.args.get('key')
+    gen_type = request.args.get('type')
+    year = request.args.get('year')
+    us_region = request.args.get('us_region')
+    province_1 = request.args.get('province1')
+    province_2 = request.args.get('province2')
+    ## Redirect to the generator type filter
+    if table == 'generators' and province and gen_type:
+        return return_generator_type(province, gen_type)
+    ## Redirect to the reference list
+    elif table == 'references' and reference_key:
+        return return_ref(reference_key)
+    ## Redirect to international transfers
+    elif table == 'international_transfers' and year and province and us_region:
+        return return_international_hourly_transfers(year, province, us_region)
+    ## Redirect to interprovincial transfers
+    elif table == 'interprovincial_transfers' and year and province_1 and province_2:
+        return return_interprovincial_hourly_transfer(year, province_1, province_2)
+    ## Redirect to provincal demand
+    elif table == 'provincial_demand' and year and province and not us_region:
+        return return_provincial_hourly_demand(year, province)
+    ## Redirect to the province filter
+    elif province:
+        return return_based_on_prov(table, province)
+    
+    ## Join the subtables on the node table
     if table == "junctions":
         table = "nodes"
         query = f"SELECT * FROM {table} WHERE node_type = 'JCT';"
@@ -228,7 +258,6 @@ def return_columns(table):
     return json.dumps(attributes, cls= Encoder)
 
 ##Returns the reference from the given reference key
-@app.route('/reference_list/key=<string:key>', methods=['GET'])
 def return_ref(key):
     if not RepresentsInt(key):
         raise InvalidUsage('Key must be an integer', status_code=400)
@@ -259,12 +288,10 @@ def return_ref(key):
     return json.dumps(source, cls= Encoder)
 
 ##Returns the specified table based on Province
-@app.route('/<string:table>', methods=['GET'])
-def return_based_on_prov(table):
+def return_based_on_prov(table, province):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
     
-    province = request.args.get('province')
     ## Query interties joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -331,13 +358,12 @@ def return_based_on_prov(table):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between a specified province and US region
-@app.route('/international_transfers/year=<int:year>&province<string:province>&us_region<string:state>', methods=['GET'])
 def return_international_hourly_transfers(year, province, state):
     query = f"SELECT * FROM international_transfers \
                 WHERE province = '{province}' AND \
                 us_state = '{state}' AND \
                 local_time LIKE '{year}%'"
-    
+
     result = send_query(query)
     ## Handling empty tables and bad requests
     if result == 0:
@@ -356,13 +382,11 @@ def return_international_hourly_transfers(year, province, state):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between two specified provinces
-@app.route('/interprovincial_transfers/year=<int:year>&province1=<string:province_1>&province2<string:province_2>', methods=['GET'])
 def return_interprovincial_hourly_transfer(year, province_1, province_2):
     query = f"SELECT * FROM interprovincial_transfers \
                 WHERE province_1 = '{province_1}' AND \
                 province_2 = '{province_2}' AND \
                 local_time LIKE '{year}%';"
-    
     result = send_query(query)
 
     ## Handling empty tables and bad requests
@@ -381,7 +405,6 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the demand in a specified province
-@app.route('/provincial_demand/year=<int:year>&province=<string:province>', methods=['GET'])
 def return_provincial_hourly_demand(year, province):
     query = f"SELECT * FROM provincial_demand \
                 WHERE province = '{province}' AND \
@@ -404,12 +427,10 @@ def return_provincial_hourly_demand(year, province):
     return json.dumps(result, cls= Encoder)
 
 ##Returns generators filtered by generation type
-@app.route('/generators/province=<string:province>&type=<string:gen_type>', methods=['GET'])
 def return_generator_type(province, gen_type):
     ## Handling unknown generator type
     if gen_type not in gen_types:
         raise InvalidUsage('Invalid generator type',status_code=404)
-    
     query = f"SELECT * FROM generators \
                 WHERE gen_type_copper = '{gen_type}' AND \
                 province = '{province}';"
