@@ -54,19 +54,14 @@ gen_types = ("wind",
             "solar",
             "hydro_run",
             "hydro_daily",
-            "hydro_monthly")
+            "hydro_monthly",
+            "peaker",
+            "diesel",
+            "nuclear",
+            "hydro_pump")
 
 #Helper Methods
 #====================================================================
-#Checks if string is an int
-#taken from: https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except
-def RepresentsInt(s):
-    try: 
-        int(s)
-        return True
-    except ValueError:
-        return False
-
 ##Executes the query to the database
 def send_query(query):
     cur = mysql.connection.cursor()
@@ -259,11 +254,8 @@ def return_columns(table):
 
 ##Returns the reference from the given reference key
 def return_ref(key):
-    if not RepresentsInt(key):
-        raise InvalidUsage('Key must be an integer', status_code=400)
-
-    if int(key) <= 0:
-        raise InvalidUsage('Key must be a positive integer', status_code=400)
+    if not isinstance(key, int) or int(key) <= 0:
+        raise InvalidUsage('Key must be a positive integer', status_code=404)
 
     ## Query the reference list
     query = f"SELECT * FROM reference_list WHERE id = {key}"
@@ -273,7 +265,7 @@ def return_ref(key):
     if source == 0:
         raise InvalidUsage('Key was invalid', status_code=404)
     elif len(source) == 0:
-        raise InvalidUsage('Key was not associated with any reference', status_code=200)
+        raise InvalidUsage('Key was not associated with any reference', status_code=404)
     
     ## Get the column names from the reference list
     column_names = get_columns("reference_list")
@@ -346,7 +338,7 @@ def return_based_on_prov(table, province):
     if result == 0:
         raise InvalidUsage('Invalid province',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('No results found',status_code=200)
+        raise InvalidUsage('No results found',status_code=404)
     
     ## Format the list to "'column_name': 'value'"
     for row_idx,row in enumerate(result):
@@ -369,7 +361,7 @@ def return_international_hourly_transfers(year, province, state):
     if result == 0:
         raise InvalidUsage('Invalid province, state, year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('No results found',status_code=200)
+        raise InvalidUsage('No results found',status_code=404)
 
     column_names = get_columns("international_transfers")
 
@@ -393,7 +385,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     if result == 0:
         raise InvalidUsage('Invalid province, province, year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('No results found',status_code=200)
+        raise InvalidUsage('No results found',status_code=404)
     column_names = get_columns("interprovincial_transfers")
 
     ## Format the list to "'column_name': 'value'"
@@ -415,7 +407,7 @@ def return_provincial_hourly_demand(year, province):
     if result == 0:
         raise InvalidUsage('Invalid province and year combination',status_code=400)
     elif len(result) == 0:
-        raise InvalidUsage('No results found',status_code=200)
+        raise InvalidUsage('No results found',status_code=404)
     column_names = get_columns("provincial_demand")
 
     ## Format the list to "'column_name': 'value'"
@@ -439,7 +431,7 @@ def return_generator_type(province, gen_type):
 
     ## Handling bad requests and empty tables
     if len(result) == 0:
-        raise InvalidUsage(f"No {gen_type} generators found in {province}", status_code=200)
+        raise InvalidUsage(f"No {gen_type} generators found in {province}", status_code=404)
     elif result == 0:
         raise InvalidUsage('Invalid generator type or province', status_code=400)
 
