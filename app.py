@@ -259,11 +259,12 @@ def return_ref(key):
     return json.dumps(source, cls= Encoder)
 
 ##Returns the specified table based on Province
-@app.route('/<string:table>/province=<string:province>', methods=['GET'])
-def return_based_on_prov(table, province):
+@app.route('/<string:table>', methods=['GET'])
+def return_based_on_prov(table):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-
+    
+    province = request.args.get('province')
     ## Query interties joined on nodes
     if table == "interties":
         query = f"SELECT \

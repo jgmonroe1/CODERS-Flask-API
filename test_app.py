@@ -70,19 +70,19 @@ class TestApp(unittest.TestCase):
 		self.assertEqual(response_dict['message'],'Key must be a positive integer')
 
 	def test_return_based_on_prov(self):
-		response = requests.get(BASE+"/substations/province=NB")
+		response = requests.get(BASE+"/substations?province=NB")
 		response_list = response.json()
 		self.assertEqual(type(response_list),type([1,1]))
 
 	def test_return_based_on_prov_wrong_table(self):
-		response = requests.get(BASE+"/not_a_table/province=NB")
+		response = requests.get(BASE+"/not_a_table?province=NB")
 		response_code = response.status_code
 		response_dict = response.json()
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'],'Table not recognized')
 
 	def test_return_based_on_prov_wrong_prov(self):
-		response = requests.get(BASE+"/generators/province=XX")
+		response = requests.get(BASE+"/generators?province=XX")
 		response_code = response.status_code
 		response_dict = response.json()
 		self.assertEqual(response_code, 200)
