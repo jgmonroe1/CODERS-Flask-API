@@ -177,19 +177,19 @@ def return_table(table):
     province_1 = request.args.get('province1')
     province_2 = request.args.get('province2')
     ## Redirect to the generator type filter
-    if table == 'generators' and province and gen_type:
+    if table == 'generators' and gen_type:
         return return_generator_type(province, gen_type)
     ## Redirect to the reference list
     elif table == 'references' and reference_key:
         return return_ref(reference_key)
     ## Redirect to international transfers
-    elif table == 'international_transfers' and year and province and us_region:
+    elif table == 'international_transfers':
         return return_international_hourly_transfers(year, province, us_region)
     ## Redirect to interprovincial transfers
-    elif table == 'interprovincial_transfers' and year and province_1 and province_2:
+    elif table == 'interprovincial_transfers':
         return return_interprovincial_hourly_transfer(year, province_1, province_2)
     ## Redirect to provincal demand
-    elif table == 'provincial_demand' and year and province and not us_region:
+    elif table == 'provincial_demand':
         return return_provincial_hourly_demand(year, province)
     ## Redirect to the province filter
     elif province:
@@ -337,7 +337,7 @@ def return_based_on_prov(table, province):
     elif table in ("generators","transmission_lines","storage_batteries"):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
-        raise InvalidUsage('Table has no province attribute',status_code=400)
+        raise InvalidUsage('Table has no province attribute',status_code=404)
 
     result = send_query(query)
 
@@ -346,7 +346,7 @@ def return_based_on_prov(table, province):
 
     ## Handling bad requests and empty tables
     if result == 0:
-        raise InvalidUsage('Invalid province',status_code=400)
+        raise InvalidUsage('Invalid province',status_code=404)
     elif len(result) == 0:
         raise InvalidUsage('No results found',status_code=404)
     
@@ -361,6 +361,14 @@ def return_based_on_prov(table, province):
 
 ##Returns the transfers between a specified province and US region
 def return_international_hourly_transfers(year, province, state):
+    ## Check if the correct parameters were given
+    if not year:
+        raise InvalidUsage('No year provided', status_code=404)
+    elif not province:
+        raise InvalidUsage('No province provided',status_code=404)
+    elif not state:
+        raise InvalidUsage('No US region provided',status_code=404)
+
     query = f"SELECT * FROM international_transfers \
                 WHERE province = '{province}' AND \
                 us_state = '{state}' AND \
@@ -369,7 +377,7 @@ def return_international_hourly_transfers(year, province, state):
     result = send_query(query)
     ## Handling empty tables and bad requests
     if result == 0:
-        raise InvalidUsage('Invalid province, state, year combination',status_code=400)
+        raise InvalidUsage('Invalid province, state, year combination',status_code=404)
     elif len(result) == 0:
         raise InvalidUsage('No results found',status_code=404)
 
@@ -385,6 +393,12 @@ def return_international_hourly_transfers(year, province, state):
 
 ##Returns the transfers between two specified provinces
 def return_interprovincial_hourly_transfer(year, province_1, province_2):
+    ## Check if the correct parameters were given
+    if not year:
+        raise InvalidUsage('No year provided',status_code=404)
+    elif not province_1 or not province_2:
+        raise InvalidUsage('Did not provide two provinces',status_code=404)
+
     query = f"SELECT * FROM interprovincial_transfers \
                 WHERE province_1 = '{province_1}' AND \
                 province_2 = '{province_2}' AND \
@@ -393,7 +407,7 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
 
     ## Handling empty tables and bad requests
     if result == 0:
-        raise InvalidUsage('Invalid province, province, year combination',status_code=400)
+        raise InvalidUsage('Invalid province, province, year combination',status_code=404)
     elif len(result) == 0:
         raise InvalidUsage('No results found',status_code=404)
     column_names = get_columns("interprovincial_transfers")
@@ -408,6 +422,12 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
 
 ##Returns the demand in a specified province
 def return_provincial_hourly_demand(year, province):
+    ## Check if the correct parameters were given
+    if not year:
+        raise InvalidUsage('No year provided',status_code=404)
+    elif not province:
+        raise InvalidUsage('No province provided',status_code=404)
+
     query = f"SELECT * FROM provincial_demand \
                 WHERE province = '{province}' AND \
                 local_time LIKE '{year}%'"
@@ -415,7 +435,7 @@ def return_provincial_hourly_demand(year, province):
     result = send_query(query)
     ## Handling bad requests
     if result == 0:
-        raise InvalidUsage('Invalid province and year combination',status_code=400)
+        raise InvalidUsage('Invalid province and year combination',status_code=404)
     elif len(result) == 0:
         raise InvalidUsage('No results found',status_code=404)
     column_names = get_columns("provincial_demand")
@@ -443,7 +463,7 @@ def return_generator_type(province, gen_type):
     if len(result) == 0:
         raise InvalidUsage(f"No {gen_type} generators found in {province}", status_code=404)
     elif result == 0:
-        raise InvalidUsage('Invalid generator type or province', status_code=400)
+        raise InvalidUsage('Invalid generator type or province', status_code=404)
 
     column_names = get_columns("generators")
 

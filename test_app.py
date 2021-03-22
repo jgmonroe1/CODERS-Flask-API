@@ -1,7 +1,6 @@
 import unittest
 import requests
 
-
 BASE = "http://127.0.0.1:5000"
 
 
@@ -123,5 +122,50 @@ class TestApp(unittest.TestCase):
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'], 'No hydro_daily generators found in FOO')
 
+	## TRY BREAK THE CODE
+	##=======================
+
+	## Requests the international transfers without a US state
+	def test_international_transfers_no_state(self):
+		response = requests.get(BASE+"/international_transfers?year=2018&province=AB")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No US region provided')
+
+	def test_international_transfers_no_province(self):
+		response = requests.get(BASE+"/international_transfers?year=2018&us_region=Montana")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No province provided')
+
+	def test_international_transfers_no_year(self):
+		response = requests.get(BASE+"/international_transfers?province=2018&us_region=Montana")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No year provided')
+
+	def test_interprovincial_transfers_no_year(self):
+		response = requests.get(BASE+"/interprovincial_transfers?province_1=AB&province_2=BC")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No year provided')
+
+	def test_interprovincial_transfers_one_province(self):
+		response = requests.get(BASE+"/interprovincial_transfers?year=2018&province_1=AB")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'Did not provide two provinces')
+
+	def test_interprovincial_transfers_no_provinces(self):
+		response = requests.get(BASE+"/interprovincial_transfers?year=2018")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'Did not provide two provinces')
 if __name__ == '__main__':
 	unittest.main()
