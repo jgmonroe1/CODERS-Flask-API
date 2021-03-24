@@ -114,6 +114,10 @@ def get_columns(table):
             columns.append(column[0])
     return columns
 
+##Converts list to dictionary
+def Convert(lst):
+    res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
+    return res_dct
 
 
 #API Routes
@@ -236,13 +240,10 @@ def return_table(table):
     ## Get the column names and send the query
     column_names = get_columns(table)
     result = send_query(query)
-
-    ## Format the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+ 
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
 
     return json.dumps(result, cls= Encoder)
 
@@ -264,7 +265,10 @@ def return_columns(table):
 
 ##Returns the reference from the given reference key
 def return_ref(key):
-    if not isinstance(key, int) or int(key) <= 0:
+    try:
+        if int(key) <=0:
+            raise InvalidUsage('Key must be a positive integer', status_code=404)
+    except:
         raise InvalidUsage('Key must be a positive integer', status_code=404)
 
     ## Query the reference list
@@ -281,11 +285,9 @@ def return_ref(key):
     column_names = get_columns("reference_list")
     
     ## Format the list to "column_name: value"
-    for row_idx,row in enumerate(source):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        source[row_idx] = row
+    for i,row in enumerate(source):
+        row = dict(zip(column_names, row))
+        source[i] = row
     
     return json.dumps(source, cls= Encoder)
 
@@ -351,11 +353,9 @@ def return_based_on_prov(table, province):
         raise InvalidUsage('No results found',status_code=404)
     
     ## Format the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
 
     return json.dumps(result, cls= Encoder)
 
@@ -384,11 +384,9 @@ def return_international_hourly_transfers(year, province, state):
     column_names = get_columns("international_transfers")
 
     ## Format the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between two specified provinces
@@ -413,11 +411,9 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     column_names = get_columns("interprovincial_transfers")
 
     ## Format the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
     return json.dumps(result, cls= Encoder)
 
 ##Returns the demand in a specified province
@@ -441,11 +437,9 @@ def return_provincial_hourly_demand(year, province):
     column_names = get_columns("provincial_demand")
 
     ## Format the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
     return json.dumps(result, cls= Encoder)
 
 ##Returns generators filtered by generation type
@@ -468,11 +462,9 @@ def return_generator_type(province, gen_type):
     column_names = get_columns("generators")
 
     ## Formats the list to "'column_name': 'value'"
-    for row_idx,row in enumerate(result):
-        row = list(row)
-        for i,column in enumerate(row):
-            row[i] = {column_names[i]: column}    
-        result[row_idx] = row
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
     return json.dumps(result, cls= Encoder)
 
 
