@@ -1,7 +1,15 @@
 from flask import Flask, render_template, request, jsonify, Response
+
 from flask_mysqldb import MySQL
+
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+from flasgger import Swagger
+from flasgger.utils import swag_from
+
+from flask_cors import CORS
+
 import sys
 import yaml
 import os
@@ -20,6 +28,14 @@ app.config['MYSQL_PASSWORD'] = db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
+
+#Swagger
+#====================================================================
+swagger = Swagger(app)
+
+#CORS
+#====================================================================
+cors = CORS(app)
 
 #Rate Limiter
 #====================================================================
@@ -146,6 +162,11 @@ def start_up():
                 For locating a reference:\n\
                     http://[domain]/references?key=[reference_key]\n".replace('  ','')
     return jsonify(welcome_msg + functions)
+
+##Return swagger documentation
+@app.route('/api/docs')
+def return_docs():
+    return render_template('swaggerui.html')
 
 ##Returns the available filters
 @app.route('/filters', methods=['GET'])

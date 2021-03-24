@@ -1,0 +1,2254 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CODERS API",
+    "description": "This is API was built to provide users with access to the Canadian Open-source Database for Electricity Research and Systems-Modelling (CODERS). CODERS is an open-source database project developed by the Sustainable Energy Systems Integration and Transition Group (SESIT). The API was developed using the Python Flask framework and its functions are limited to a select set of queries. Since the API is only meant for querying, the GET HTTP request is only method implemented within the API.",
+    "termsOfService": "Currently_Unknown",
+    "contact": {
+      "email": "add_email_here@email.com"
+    },
+    "license": {
+      "name": "Currently Unknown",
+      "url": "http://add_URL_here.com"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5000"
+    }
+  ],
+  "paths": {
+    "/filters": {
+      "summary": "List all available filters and the objects or tables they apply to",
+      "get": {
+        "description": "Operation to fetch list of filters",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/filters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tables": {
+      "summary": "List all available objects/tables",
+      "get": {
+        "description": "Operation to fetch list of objects and tables",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "example": "substations, generators, storage_batteries, junctions... etc",
+                "schema": {
+                  "$ref": "#/components/schemas/tables"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generators": {
+      "summary": "Generators generate electricity and are always connected to a substation that feeds into the grid.",
+      "get": {
+        "description": "Operation to fetch list of all generators",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gen_type",
+            "description": "Filter objects based on generator type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/generators"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generators/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/substations": {
+      "summary": "Return all substations  and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all generators",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/substations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/substations/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transmission_lines": {
+      "summary": "Return all transmission lines  and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all transmission lines",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/transmission_lines"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transmission_lines/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/storage_batteries": {
+      "summary": "Return all storage batteries and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all storage batteries",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/storage_batteries"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/storage_batteries/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interties": {
+      "summary": "Return all interties and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all interties",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/interties"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interties/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/junctions": {
+      "summary": "Return all junctions and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all junctions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/junctions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/junctions/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/distribution_transfers": {
+      "summary": "Return all distribution transfers and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all distribution transfers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/distribution_transfers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/no_prov_attr"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/distribution_transfers/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contribution_transfers": {
+      "summary": "Return all contribution transfers and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all contribution transfers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/contribution_transfers"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contribution_transfers/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generation_costs": {
+      "summary": "Return all generation costs and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all generation costs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/generation_costs"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generation_costs/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/international_transfers": {
+      "summary": "Return all international transfers and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all international transfers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/international_transfers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/international_transfers/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Table not recognized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interprovincial_transfers": {
+      "summary": "Return all interprovincial transfers and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all interprovincial transfers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/interprovincial_transfers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interprovincial_transfers/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provincial_demand": {
+      "summary": "Return all provincial demands and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all provincial demands",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "provincial_demand",
+            "description": "List of every provincial demand and its attributes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/provincial_demand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_prov"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provincial_demand/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intertie_all": {
+      "summary": "Return all intertie alls and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all intertie alls",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "intertie_all",
+            "description": "List of every intertie all and its attributes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/intertie_all"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intertie_all/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intertie_provincial": {
+      "summary": "Return all intertie provincials and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all intertie provincials",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "intertie_provincial",
+            "description": "List of every intertie provincial and its attributes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/intertie_provincial"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intertie_provincial/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cpi_can": {
+      "summary": "Return all cpi cans and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all cpi cans",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cpi_can",
+            "description": "List of every cpi can and its attributes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cpi_can"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cpi_can/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references": {
+      "summary": "Return all references and all their attributes",
+      "get": {
+        "description": "Operation to fetch list of all references",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/references"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/{id}": {
+      "summary": "Return all references and all their attributes",
+      "get": {
+        "description": "Operation to fetch specified reference",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The ID of the reference",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reference"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/key_must_be_int"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/invalid_key"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/attributes": {
+      "get": {
+        "description": "Operation to fetch list of all attributes",
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/attributes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Table not recognized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/table_not_rec"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "generators": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "node_code": {
+              "type": "string",
+              "example": "BC_ABC_GEN"
+            },
+            "project_name": {
+              "type": "string",
+              "example": "ABC generator"
+            },
+            "owner": {
+              "type": "string",
+              "example": "BC windro"
+            },
+            "location": {
+              "type": "string",
+              "example": "Foobar inlet"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "latitude": {
+              "type": "number",
+              "example": 47.123456
+            },
+            "longitude": {
+              "type": "number",
+              "example": -68.123456
+            },
+            "ballance_area": {
+              "type": "string",
+              "example": "British Columbia.a"
+            },
+            "connecting_node": {
+              "type": "string",
+              "example": "BC_ABC_SUB"
+            },
+            "connecting_vol": {
+              "type": "integer",
+              "example": 138
+            },
+            "start_year": {
+              "type": "integer",
+              "example": 2019
+            },
+            "end_year": {
+              "type": "integer",
+              "example": 2020
+            },
+            "gen_type": {
+              "type": "string",
+              "example": "Wind_Onshore"
+            },
+            "gen_type_copper": {
+              "type": "string",
+              "example": "wind"
+            },
+            "capacity": {
+              "type": "integer",
+              "example": 45
+            },
+            "capacity_adjust": {
+              "type": "number",
+              "example": "21%"
+            },
+            "effective_capacity": {
+              "type": "integer",
+              "example": 9.45
+            },
+            "capacity_factor": {
+              "type": "number",
+              "example": "35.00%"
+            },
+            "ave_energy": {
+              "type": "number",
+              "example": 138.76
+            },
+            "num_units": {
+              "type": "integer",
+              "example": 2
+            },
+            "heat_rate": {
+              "type": "integer",
+              "example": 25
+            },
+            "min_capacity": {
+              "type": "integer",
+              "example": 140
+            },
+            "max_capacity": {
+              "type": "integer",
+              "example": 240
+            },
+            "min_uptime": {
+              "type": "integer",
+              "example": 6
+            },
+            "min_downtime": {
+              "type": "integer",
+              "example": 2
+            },
+            "spin_up_rate": {
+              "type": "number",
+              "example": "20%"
+            },
+            "spin_down_rate": {
+              "type": "number",
+              "example": "20%"
+            },
+            "startup_ramp_limit": {
+              "type": "number",
+              "example": 1220.12
+            },
+            "shutdown_ramp_limit": {
+              "type": "number",
+              "example": 1220.21
+            },
+            "must_run": {
+              "type": "boolean",
+              "example": true
+            },
+            "op_reserve_fraction": {
+              "type": "number",
+              "example": "20.21%"
+            },
+            "outage_dur": {
+              "type": "integer",
+              "example": 5
+            },
+            "forced-outage_rage": {
+              "type": "number",
+              "example": "20.21%"
+            },
+            "maintenance_rate": {
+              "type": "integer",
+              "example": 5
+            },
+            "startup_cost": {
+              "type": "number",
+              "example": 1000.21
+            },
+            "fuel_cost": {
+              "type": "number",
+              "example": 1000.21
+            },
+            "shutdown_cost": {
+              "type": "number",
+              "example": 1000.21
+            },
+            "fixed_cost": {
+              "type": "number",
+              "example": 1000000.21
+            },
+            "variable_cost": {
+              "type": "number",
+              "example": 10.21
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "substations": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "node_code": {
+              "type": "string",
+              "example": "BC_ABC_DSS"
+            },
+            "node_type": {
+              "type": "string",
+              "example": "SUB"
+            },
+            "sub_type": {
+              "type": "string",
+              "example": "DSS"
+            },
+            "name": {
+              "type": "string",
+              "example": "foobar"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "latitude": {
+              "type": "number",
+              "example": 47.123456
+            },
+            "longitude": {
+              "type": "number",
+              "example": -68.123456
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "transmission_lines": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "transmission_line_id": {
+              "type": "integer",
+              "example": 6
+            },
+            "circuit_id": {
+              "type": "string",
+              "example": "L0020"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "planning_region": {
+              "type": "string",
+              "example": "South"
+            },
+            "starting_node": {
+              "type": "string",
+              "example": "BC_ABC_DSS"
+            },
+            "ending_node": {
+              "type": "string",
+              "example": "BC_DEF_DCC"
+            },
+            "num_circuits": {
+              "type": "integer",
+              "example": 1
+            },
+            "current": {
+              "type": "string",
+              "example": "DC"
+            },
+            "length": {
+              "type": "number",
+              "example": 200
+            },
+            "voltage": {
+              "type": "integer",
+              "example": 139
+            },
+            "reactance": {
+              "type": "number",
+              "example": 5.38
+            },
+            "summer_ampacity": {
+              "type": "integer",
+              "example": 100
+            },
+            "winter_ampacity": {
+              "type": "integer",
+              "example": 200
+            },
+            "summer_rating": {
+              "type": "integer",
+              "example": 100
+            },
+            "winter_rating": {
+              "type": "integer",
+              "example": 200
+            },
+            "power_factor": {
+              "type": "number",
+              "example": "5.00%"
+            },
+            "smax": {
+              "type": "number",
+              "example": 3
+            },
+            "summer_capacity": {
+              "type": "integer",
+              "example": 140
+            },
+            "winter_capacity": {
+              "type": "integer",
+              "example": 240
+            },
+            "owner": {
+              "type": "string",
+              "example": "BC Windro"
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "storage_batteries": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "node_code": {
+              "type": "string",
+              "example": "BC_ABC_STO"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "project_name": {
+              "type": "string",
+              "example": "ABC storage"
+            },
+            "owner": {
+              "type": "string",
+              "example": "BC windro"
+            },
+            "location": {
+              "type": "string",
+              "example": "Foobar inlet"
+            },
+            "latitude": {
+              "type": "number",
+              "example": 47.123456
+            },
+            "longitude": {
+              "type": "number",
+              "example": -68.123456
+            },
+            "ballance_area": {
+              "type": "string",
+              "example": "British Columbia.a"
+            },
+            "connecting_node": {
+              "type": "string",
+              "example": "BC_ABC_SUB"
+            },
+            "connecting_vol": {
+              "type": "integer",
+              "example": 138
+            },
+            "start_year": {
+              "type": "integer",
+              "example": 2019
+            },
+            "end_year": {
+              "type": "integer",
+              "example": 2020
+            },
+            "gen_type": {
+              "type": "string",
+              "example": "Wind_Onshore"
+            },
+            "gen_type_copper": {
+              "type": "string",
+              "example": "wind"
+            },
+            "technology": {
+              "type": "string",
+              "example": "Lithium Ion"
+            },
+            "storage_capacity": {
+              "type": "integer",
+              "example": 10
+            },
+            "storage_energy": {
+              "type": "integer",
+              "example": 20
+            },
+            "duration": {
+              "type": "number",
+              "example": 35
+            },
+            "associated_gen": {
+              "type": "string",
+              "example": "Foobar"
+            },
+            "cost": {
+              "type": "number",
+              "example": 3.5
+            },
+            "min_up_time": {
+              "type": "integer",
+              "example": 2
+            },
+            "min_down_time": {
+              "type": "integer",
+              "example": 2
+            },
+            "forced_outage_rate": {
+              "type": "number",
+              "example": 24.3
+            },
+            "maintenance_days": {
+              "type": "number",
+              "example": 23.4
+            },
+            "fixed_cost": {
+              "type": "number",
+              "example": 1000000.21
+            },
+            "variable_cost": {
+              "type": "number",
+              "example": 10.21
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "interties": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "node_code": {
+              "type": "string",
+              "example": "BC_ABC_IPT"
+            },
+            "node_type": {
+              "type": "string",
+              "example": "INT"
+            },
+            "intertie_type": {
+              "type": "string",
+              "example": "IPT"
+            },
+            "name": {
+              "type": "string",
+              "example": "foobar"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "latitude": {
+              "type": "number",
+              "example": 47.123456
+            },
+            "longitude": {
+              "type": "number",
+              "example": -68.123456
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "junctions": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "node_code": {
+              "type": "string",
+              "example": "BC_ABC_JCT"
+            },
+            "node_type": {
+              "type": "string",
+              "example": "JCT"
+            },
+            "name": {
+              "type": "string",
+              "example": "foobar"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "latitude": {
+              "type": "number",
+              "example": 47.123456
+            },
+            "longitude": {
+              "type": "number",
+              "example": -68.123456
+            },
+            "sources": {
+              "type": "string",
+              "example": "col1:123,col2:124,..."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "distribution_transfers": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "date_time_slot": {
+              "type": "string",
+              "example": "2018-01-01 1:00"
+            },
+            "annual_hour_end": {
+              "type": "integer",
+              "example": 120
+            },
+            "sub_node_code": {
+              "type": "string",
+              "example": "AB_ABC_DSS"
+            },
+            "transfer_type": {
+              "type": "string",
+              "example": "foobar"
+            },
+            "price_USD": {
+              "type": "number",
+              "example": "19.54$"
+            },
+            "price_CAD": {
+              "type": "number",
+              "example": "25.20$"
+            },
+            "exchange_rate": {
+              "type": "number",
+              "example": 1.0505
+            },
+            "transfer_amount": {
+              "type": "integer",
+              "example": 5
+            },
+            "export_to": {
+              "type": "integer",
+              "example": 200
+            },
+            "export_from": {
+              "type": "integer",
+              "example": 200
+            },
+            "demand": {
+              "type": "integer",
+              "example": 2000
+            },
+            "source": {
+              "type": "integer",
+              "example": 12903
+            }
+          }
+        }
+      },
+      "contribution_transfers": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "date_time_slot": {
+              "type": "string",
+              "example": "2018-01-01 1:00"
+            },
+            "gen_node_code": {
+              "type": "string",
+              "example": "BC_ABC_GEN"
+            },
+            "source": {
+              "type": "integer",
+              "example": 12903
+            }
+          }
+        }
+      },
+      "generation_costs": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "gen_type": {
+              "type": "string",
+              "example": "wind"
+            },
+            "plant_size": {
+              "type": "number",
+              "example": 12100
+            },
+            "capital_cost": {
+              "type": "number",
+              "example": 12100
+            },
+            "capital_overhead": {
+              "type": "number",
+              "example": 121
+            },
+            "interest_during_construction": {
+              "type": "number",
+              "example": 12100
+            },
+            "implementation_costs": {
+              "type": "number",
+              "example": 12100
+            },
+            "project_definition_costs": {
+              "type": "number",
+              "example": 1210
+            },
+            "total_costs": {
+              "type": "number",
+              "example": 121000
+            },
+            "economic_life": {
+              "type": "integer",
+              "example": 100
+            },
+            "annual_capital_cost": {
+              "type": "number",
+              "example": 1210000
+            },
+            "demand": {
+              "type": "integer",
+              "example": 2000
+            },
+            "source": {
+              "type": "integer",
+              "example": 12903
+            },
+            "fixed_cost_CAD": {
+              "type": "number",
+              "example": 1000000.21
+            },
+            "fixed_cost_USD": {
+              "type": "number",
+              "example": 1000000.21
+            },
+            "variable_cost_CAD": {
+              "type": "number",
+              "example": 10.21
+            },
+            "variable_cost_USD": {
+              "type": "number",
+              "example": 10.21
+            },
+            "contruction_time": {
+              "type": "integer",
+              "example": 5
+            },
+            "development_time": {
+              "type": "integer",
+              "example": 7
+            },
+            "fuel_costs_USD": {
+              "type": "number",
+              "example": 123
+            },
+            "fuel_cost_CAD": {
+              "type": "number",
+              "example": 123
+            },
+            "other_ref": {
+              "type": "string",
+              "example": "some reference material"
+            },
+            "notes": {
+              "type": "string",
+              "example": "foobar"
+            }
+          }
+        }
+      },
+      "international_transfers": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "date_time_slot": {
+              "type": "string",
+              "example": "2018-01-01 1:00"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "US_state": {
+              "type": "string",
+              "example": "montana"
+            },
+            "daily_hour_ending": {
+              "type": "integer",
+              "example": 1
+            },
+            "annual_hour_ending": {
+              "type": "integer",
+              "example": 8000
+            },
+            "price_USD": {
+              "type": "number",
+              "example": 36.34
+            },
+            "exchange_rate": {
+              "type": "number",
+              "example": 1.2756
+            },
+            "price_CAD": {
+              "type": "number",
+              "example": 36.34
+            },
+            "transfers": {
+              "type": "integer",
+              "example": 1200
+            },
+            "source": {
+              "type": "string",
+              "example": "website.com"
+            }
+          }
+        }
+      },
+      "interprovincial_transfers": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "date_time_slot": {
+              "type": "string",
+              "example": "2018-01-01 1:00"
+            },
+            "province_1": {
+              "type": "string",
+              "example": "BC"
+            },
+            "province_2": {
+              "type": "string",
+              "example": "AB"
+            },
+            "daily_hour_ending": {
+              "type": "integer",
+              "example": 1
+            },
+            "annual_hour_ending": {
+              "type": "integer",
+              "example": 8000
+            },
+            "export_to_prov_2": {
+              "type": "integer",
+              "example": 123
+            },
+            "import_from_prov_2": {
+              "type": "integer",
+              "example": 1.2756
+            },
+            "transfers": {
+              "type": "integer",
+              "example": 1200
+            },
+            "source": {
+              "type": "string",
+              "example": "website.com"
+            }
+          }
+        }
+      },
+      "provincial_demand": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "date_time_slot": {
+              "type": "string",
+              "example": "2018-01-01 1:00"
+            },
+            "province": {
+              "type": "string",
+              "example": "BC"
+            },
+            "daily_hour_ending": {
+              "type": "integer",
+              "example": 1
+            },
+            "annual_hour_ending": {
+              "type": "integer",
+              "example": 8000
+            },
+            "demand": {
+              "type": "integer",
+              "example": 12000
+            },
+            "source": {
+              "type": "string",
+              "example": "website.com"
+            }
+          }
+        }
+      },
+      "intertie_all": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "exporter": {
+              "type": "string",
+              "example": "USA (New York)"
+            },
+            "importer": {
+              "type": "string",
+              "example": "Quebec (South)"
+            },
+            "current": {
+              "type": "string",
+              "example": "ac"
+            },
+            "flow_limits_summer": {
+              "type": "integer",
+              "example": 2275
+            },
+            "flow_limits_winter": {
+              "type": "integer",
+              "example": 75
+            },
+            "CA_nodal_zone": {
+              "type": "string",
+              "example": "West - Foobar"
+            },
+            "USA_nodal_zone": {
+              "type": "string",
+              "example": "East - Foobar"
+            },
+            "other_ref": {
+              "type": "string",
+              "example": "some reference material"
+            },
+            "notes": {
+              "type": "string",
+              "example": "foobar"
+            }
+          }
+        }
+      },
+      "intertie_provincial": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "exporter": {
+              "type": "string",
+              "example": "Alberta.a"
+            },
+            "importer": {
+              "type": "string",
+              "example": "British Columbia.a"
+            },
+            "copper_code": {
+              "type": "string",
+              "example": "Alberta.a.British Columbia.a"
+            },
+            "transfer_capacity": {
+              "type": "integer",
+              "example": 1000
+            }
+          }
+        }
+      },
+      "cpi_can": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "year": {
+              "type": "integer",
+              "example": 1990
+            },
+            "cpi": {
+              "type": "number",
+              "example": 1234.1
+            }
+          }
+        }
+      },
+      "reference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 9131
+          },
+          "source": {
+            "type": "string",
+            "example": "Ismail, S."
+          },
+          "year": {
+            "type": "integer",
+            "example": 2015
+          },
+          "name": {
+            "type": "string",
+            "example": "Potential Hydro Energy: Review, Evaluation and Methodology"
+          },
+          "link": {
+            "type": "string",
+            "example": "https://filemaker.nbeub.ca/fmi/webd/NBEUB%20ToolKit13 [Matter 336]"
+          },
+          "publication": {
+            "type": "string",
+            "example": "prepared for New Brunswick Power Corporation"
+          },
+          "region": {
+            "type": "string",
+            "example": "New Brunswick"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "references": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "example": 9131
+            },
+            "source": {
+              "type": "string",
+              "example": "Ismail, S."
+            },
+            "year": {
+              "type": "integer",
+              "example": 2015
+            },
+            "name": {
+              "type": "string",
+              "example": "Potential Hydro Energy: Review, Evaluation and Methodology"
+            },
+            "link": {
+              "type": "string",
+              "example": "https://filemaker.nbeub.ca/fmi/webd/NBEUB%20ToolKit13 [Matter 336]"
+            },
+            "publication": {
+              "type": "string",
+              "example": "prepared for New Brunswick Power Corporation"
+            },
+            "region": {
+              "type": "string",
+              "example": "New Brunswick"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "tables": {
+        "type": "array",
+        "example": "table_1, table_2, table_3",
+        "items": {
+          "type": "string"
+        }
+      },
+      "attributes": {
+        "type": "array",
+        "example": "attribute_1, attribute_2, attribute_3",
+        "items": {
+          "type": "string"
+        }
+      },
+      "filters": {
+        "type": "string",
+        "example": "province: substations, generators, ..."
+      },
+      "table_not_rec": {
+        "type": "string",
+        "example": "Table not recognized"
+      },
+      "invalid_key": {
+        "type": "string",
+        "example": "Key was invlid"
+      },
+      "key_must_be_int": {
+        "type": "string",
+        "example": "Key must be a positive integer"
+      },
+      "no_prov_attr": {
+        "type": "string",
+        "example": "Table has no province attribute"
+      },
+      "invalid_prov": {
+        "type": "string",
+        "example": "Invalid province"
+      }
+    }
+  }
+}
