@@ -10,7 +10,7 @@ The CODERS API is built with Flask, Documented with Swagger UI, Packaged with Do
 ### Clone Repo
 Press the green "code" button and clone the repo either by:
 1) Copying HTTPS URL and opening GitHub Desktop -> File -> Clone repository -> URL -> paste URL and choose location
-2) Copying HTTPS URL and opening your preffered terinal -> cd into location -> run $ git clone <URL>
+2) Copying HTTPS URL and opening your preffered terminal -> cd into location -> run `$ git clone <URL>`
 3) Press Download Zip -> find .zip file -> extract it and place in preffered location
 
 ### Build Docker Image
