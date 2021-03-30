@@ -36,7 +36,7 @@ To see if the container and Flask API is working open your favorite web browser 
 <br />
 http://127.0.0.1:8888/docs <br />
 <br />
-Now the Swagger UI should pop up. Look around to familiarize with the resources availbale and use the "Try It Out" button to test a request
+Now the Swagger UI should pop up. Look around to familiarize with the resources availbale and use the "Try It Out" button to test a request<br />
 <br />
 *notice the port difference between the URL (8888) and what the flask app says (5000), this is because of the port mapping we did in the container*<br />
 
