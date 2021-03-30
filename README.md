@@ -14,21 +14,32 @@ Press the green "code" button and clone the repo either by:
 3) Press Download Zip -> find .zip file -> extract it and place in preffered location
 
 ### Build Docker Image
-cd to repos directory, then run this command `docker build -t <docker_username>/coders_api .` (the period is intentional)
+cd to repos directory, then run this command:<br />
+<br />
+`$ docker build -t <docker_username>/coders_api .` <br />
+<br />
+(the period is intentional)
 
 ### Run Docker Container
-While in the same directory use `docker run --rm -p 8888:5000 --name coders_api <docker_username>/coders_api` to run the API <br />
+While in the same directory use:<br />
+<br />
+`$ docker run --rm -p 8888:5000 --name coders_api <docker_username>/coders_api` <br />
+<br />
+to run the API <br />
+<br />
 *--rm auto removes container on exit* <br />
 *-p 8888:5000 publish a containers port to host* <br />
 *--name coders_api gives container a nickname for easier reference* <br />
 
 ### Test Out API with Swagger UI
 To see if the container and Flask API is working open your favorite web browser and type in http://127.0.0.1:8888/docs <br />
-*notice the port difference between what the flask app says (5000), this is because of the port mapping we did in the container*<br />
+<br />
+*notice the port difference between the URL (8888) and what the flask app says (5000), this is because of the port mapping we did in the container*<br />
+<br />
 Now the Swagger UI should pop up. Look around to familiarize with the resources availbale and use the "Try It Out" button to test a request
 
 ### Shut it Down
-To stop the API press ctrl c in the terminal to stop the Flask API and then run `docker stop coders_api` to stop the container
+To stop the API press ctrl c in the terminal to stop the Flask API and then run `$ docker stop coders_api` to stop the container
 
 ### Start Again
 If changes to the code are made you will have to build the docker image again before running it
