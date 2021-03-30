@@ -27,9 +27,9 @@ While in the same directory use:<br />
 <br />
 to run the API <br />
 <br />
-*--rm auto removes container on exit* <br />
-*-p 8888:5000 publish a containers port to host* <br />
-*--name coders_api gives container a nickname for easier reference* <br />
+*`--rm` auto removes container on exit* <br />
+*`-p 8888:5000` publish a containers port to host* <br />
+*`--name coders_api` gives container a nickname for easier reference* <br />
 
 ### Test Out API with Swagger UI
 To see if the container and Flask API is working open your favorite web browser and type in: <br />
