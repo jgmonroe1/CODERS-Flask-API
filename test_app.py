@@ -71,7 +71,7 @@ class TestApp(unittest.TestCase):
 	def test_return_based_on_prov(self):
 		response = requests.get(BASE+"/substations?province=NB")
 		response_list = response.json()
-		self.assertEqual(type(response_list),type([1,1]))
+		self.assertEqual(type(response_list),dict)
 
 	def test_return_based_on_prov_wrong_table(self):
 		response = requests.get(BASE+"/not_a_table?province=NB")

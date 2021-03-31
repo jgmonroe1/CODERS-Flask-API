@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, Response
 
-from flask_mysqldb import MySQL
+import mysql.connector
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -15,19 +15,23 @@ import yaml
 import os
 import json
 
-from classes.invalidUsage import InvalidUsage
+from classes.invalidUsage import InvalidUsage 
 from classes.encoder import Encoder
 
 app = Flask(__name__)
 
 ##Configure db
 db = yaml.load(open('db.yaml'), Loader=yaml.FullLoader)
-app.config['MYSQL_HOST'] = db['mysql_host'] #host.docker.internal
-app.config['MYSQL_USER'] = db['mysql_user']
-app.config['MYSQL_PASSWORD'] = db['mysql_password']
-app.config['MYSQL_DB'] = db['mysql_db']
-
-mysql = MySQL(app)
+# app.config['MYSQL_HOST'] = db['mysql_host'] #host.docker.internal
+# app.config['MYSQL_USER'] = db['mysql_user']
+# app.config['MYSQL_PASSWORD'] = db['mysql_password']
+# app.config['MYSQL_DB'] = db['mysql_db']
+db = mysql.connector.connect(
+    host=db['mysql_host'], 
+    user=db['mysql_user'], 
+    password=db['mysql_password'], 
+    database=db['mysql_db']
+    )
 
 #Swagger
 #====================================================================
@@ -86,7 +90,7 @@ gen_types = ("wind",
 #====================================================================
 ##Executes the query to the database
 def send_query(query):
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     try:
         cur.execute(query)
         result = cur.fetchall()
@@ -192,7 +196,7 @@ def return_table(table):
     ## Check if the table exists
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-
+    
     ## Parse the request for different parameters
     province = request.args.get('province')
     reference_key = request.args.get('key')
@@ -269,13 +273,14 @@ def return_table(table):
     return json.dumps(result, cls= Encoder)
 
 ##Returns the columns from a specified table
-@app.route('/<string:table>/attributes', methods=['GET'])
+@app.route('/<string:table>/<string:attributes>', methods=['GET'])
 @Limiter.limit('100 per second')
-def return_columns(table):
+def return_columns(table, attributes):
     ## Check if the table exists
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-    
+    elif attributes != "attributes":
+        raise InvalidUsage(f'/{table}/{attributes} not recognized',status_code=404)
     if table == "junctions":
         table = "nodes"
     
@@ -316,7 +321,7 @@ def return_ref(key):
 def return_based_on_prov(table, province):
     if table not in accessible_tables:
         raise InvalidUsage('Table not recognized',status_code=404)
-    
+
     ## Query interties joined on nodes
     if table == "interties":
         query = f"SELECT \
@@ -372,7 +377,7 @@ def return_based_on_prov(table, province):
         raise InvalidUsage('Invalid province',status_code=404)
     elif len(result) == 0:
         raise InvalidUsage('No results found',status_code=404)
-    
+
     ## Format the list to "'column_name': 'value'"
     for i,row in enumerate(result):
         row = dict(zip(column_names, row))
@@ -490,5 +495,5 @@ def return_generator_type(province, gen_type):
 
 
 if __name__ == '__main__':
-    #app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    app.run(debug=True)
+    # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", debug=True)
