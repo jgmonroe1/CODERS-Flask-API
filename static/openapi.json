@@ -1510,9 +1510,13 @@
               "type": "string",
               "example": "DC"
             },
-            "length": {
+            "length_km": {
               "type": "number",
               "example": 200
+            },
+            "length_mi": {
+              "type": "number",
+              "example": 160
             },
             "voltage": {
               "type": "integer",
