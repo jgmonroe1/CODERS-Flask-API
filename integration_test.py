@@ -33,45 +33,57 @@ class Tests(unittest.TestCase):
                         "references")
 
     def test_return_table(self):
-        # for table in accessible_tables:
-        #     response = requests.get(BASE + table)
-        #     response_code = response.status_code
-        #     response_dict = response.json()
-        #     self.assertEqual(response_code, 200)
-        #     if table == "substations":
-        #         query = f"SELECT \
-        #                     n.name, \
-        #                     n.node_code, \
-        #                     n.node_type, \
-        #                     s.sub_type, \
-        #                     n.owner, \
-        #                     n.province, \
-        #                     n.latitude, \
-        #                     n.longitude, \
-        #                     n.planning_region, \
-        #                     n.sources, \
-        #                     n.notes \
-        #                     FROM nodes n \
-        #                 JOIN substations s ON n.node_code = s.sub_node_code;"
-        #     elif table == "junctions":
-        #         query = f"SELECT * FROM nodes WHERE node_type = 'JCT';"
-        #     elif table == "interties":
-        #         query = f"SELECT \
-        #                     n.name, \
-        #                     n.node_code, \
-        #                     n.node_type, \
-        #                     i.intertie_type, \
-        #                     n.owner, \
-        #                     n.province, \
-        #                     n.latitude, \
-        #                     n.longitude, \
-        #                     n.planning_region, \
-        #                     n.sources, \
-        #                     n.notes \
-        #                     FROM nodes n \
-        #                 JOIN interties i ON n.node_code = i.int_node_code;"
+        for table in accessible_tables:
+            response = requests.get(BASE + table)
+            response_code = response.status_code
+            response_dict = response.json()
+            self.assertEqual(response_code, 200)
+            if table == "substations":
+                query = f"SELECT \
+                            n.name, \
+                            n.node_code, \
+                            n.node_type, \
+                            s.sub_type, \
+                            n.owner, \
+                            n.province, \
+                            n.latitude, \
+                            n.longitude, \
+                            n.planning_region, \
+                            n.sources, \
+                            n.notes \
+                            FROM nodes n \
+                        JOIN substations s ON n.node_code = s.sub_node_code;"
+            elif table == "junctions":
+                query = f"SELECT * FROM nodes WHERE node_type = 'JCT';"
+            elif table == "interties":
+                query = f"SELECT \
+                            n.name, \
+                            n.node_code, \
+                            n.node_type, \
+                            i.intertie_type, \
+                            n.owner, \
+                            n.province, \
+                            n.latitude, \
+                            n.longitude, \
+                            n.planning_region, \
+                            n.sources, \
+                            n.notes \
+                            FROM nodes n \
+                        JOIN interties i ON n.node_code = i.int_node_code;"
+            else:
+                query = f"SELECT * FROM {table};"
+            cursor.execute(query)
+            query_results = cursor.fetchall()
+            ## Check if the number of rows is equal
+            self.assertEqual(len(response_dict), len(query_results))
 
-        #     cursor.execute(query)
-        #     for 
+            ## Check if the first row is the same
+            for i,column in enumerate(response_dict[0]):
+                self.assertEqual(column[1], query_results[i])
+            
+            ## Check if the last row is the same
+            for i,column in enumerate(response_dict[-1]):
+                self.assertEqual(column[1], query_results[i])
+
 if __name__ == '__main__':
 	unittest.main()
