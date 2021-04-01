@@ -37,7 +37,6 @@ class Tests(unittest.TestCase):
             response = requests.get(BASE + table)
             response_code = response.status_code
             response_dict = response.json()
-            self.assertEqual(response_code, 200)
             if table == "substations":
                 query = f"SELECT \
                             n.name, \
@@ -74,6 +73,11 @@ class Tests(unittest.TestCase):
                 query = f"SELECT * FROM {table};"
             cursor.execute(query)
             query_results = cursor.fetchall()
+
+            ## Check the status code and return type
+            self.assertEqual(response_code, 200)
+            self.assertEqual(type(response_dict), dict)
+            
             ## Check if the number of rows is equal
             self.assertEqual(len(response_dict), len(query_results))
 
