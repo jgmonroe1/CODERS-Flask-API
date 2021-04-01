@@ -34,9 +34,7 @@ class Tests(unittest.TestCase):
 
     def test_return_table(self):
         for table in accessible_tables:
-            response = requests.get(BASE + table)
-            response_code = response.status_code
-            response_dict = response.json()
+            #Arrange
             if table == "substations":
                 query = f"SELECT \
                             n.name, \
@@ -74,6 +72,12 @@ class Tests(unittest.TestCase):
             cursor.execute(query)
             query_results = cursor.fetchall()
 
+            #Act
+            response = requests.get(BASE + table)
+            response_code = response.status_code
+            response_dict = response.json()
+
+            #Assert
             ## Check the status code and return type
             self.assertEqual(response_code, 200)
             self.assertEqual(type(response_dict), dict)
