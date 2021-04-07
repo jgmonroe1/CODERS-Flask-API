@@ -75,7 +75,7 @@ accessible_tables = ("generators",
 
 gen_types = ("wind",
             "gas",
-            "waste",
+            "biomass",
             "coal",
             "solar",
             "hydro_run",
