@@ -124,6 +124,13 @@ def get_columns(table):
                         "planning_region", 
                         "sources", 
                         "notes"]
+    elif table == 'references':
+        query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'reference_list' ORDER BY ORDINAL_POSITION"
+        results = send_query(query)
+        if results == 0:
+            return 0
+        for column in results:
+            columns.append(column[0])
     else:   
         query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
         results = send_query(query)
