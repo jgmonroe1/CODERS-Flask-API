@@ -259,17 +259,19 @@ def return_table(table):
                     FROM nodes n \
                     JOIN interties i ON n.node_code = i.int_node_code;"
     ## Table is not substations, junctions, or interties
+    elif table == "references":
+        table = "reference_list"
+        query = "SELECT * FROM reference_list;"
     else:
         query = f"SELECT * FROM {table};"
 
     ## Get the column names and send the query
     column_names = get_columns(table)
     result = send_query(query)
- 
-    for i,row in enumerate(result):
+    for i,row in enumerate(result):   
         row = dict(zip(column_names, row))
         result[i] = row
-
+    
     return json.dumps(result, cls= Encoder)
 
 ##Returns the columns from a specified table
