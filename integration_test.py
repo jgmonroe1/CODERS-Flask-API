@@ -132,6 +132,17 @@ class Tests(unittest.TestCase):
                                 "planning_region", 
                                 "sources", 
                                 "notes"]
+            elif table == 'junctions':
+                db_columns = ["name", 
+                                "node_code", 
+                                "node_type", 
+                                "owner", 
+                                "province", 
+                                "latitude", 
+                                "longitude", 
+                                "planning_region", 
+                                "sources", 
+                                "notes"]
             else:   
                 query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
                 results = self.send_query(query)
@@ -162,3 +173,6 @@ class Tests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
