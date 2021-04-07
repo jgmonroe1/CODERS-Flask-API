@@ -68,8 +68,7 @@ accessible_tables = ("generators",
                     "international_transfers",
                     "interprovincial_transfers",
                     "provincial_demand",
-                    "intertie_all",
-                    "intertie_provincial",
+                    "interface_capacity",
                     "cpi_can",
                     "references")
 
