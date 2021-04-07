@@ -32,8 +32,17 @@ class Tests(unittest.TestCase):
                         "cpi_can",
                         "references")
 
+    def send_query(self, query):
+        cur = self.db.cursor()
+        try:
+            cur.execute(query)
+            result = cur.fetchall()
+            return list(result)
+        except E:
+            print("issue with sql query")
+
     def test_return_table(self):
-        for table in accessible_tables:
+        for table in self.accessible_tables:
             #Arrange
             if table == "substations":
                 query = f"SELECT \
@@ -69,29 +78,101 @@ class Tests(unittest.TestCase):
                         JOIN interties i ON n.node_code = i.int_node_code;"
             else:
                 query = f"SELECT * FROM {table};"
-            cursor.execute(query)
-            query_results = cursor.fetchall()
+
+            query_results = self.send_query(query)
+
 
             #Act
             response = requests.get(BASE + table)
             response_code = response.status_code
-            response_dict = response.json()
+            response_list = response.json()
 
             #Assert
             ## Check the status code and return type
             self.assertEqual(response_code, 200)
-            self.assertEqual(type(response_dict), dict)
+            self.assertEqual(type(response_list), list)
             
             ## Check if the number of rows is equal
-            self.assertEqual(len(response_dict), len(query_results))
+            self.assertEqual(len(response_list), len(query_results))
 
             ## Check if the first row is the same
-            for i,column in enumerate(response_dict[0]):
+            for i,column in enumerate(response_list[0]):
                 self.assertEqual(column[1], query_results[i])
             
             ## Check if the last row is the same
-            for i,column in enumerate(response_dict[-1]):
+            for i,column in enumerate(response_list[-1]):
                 self.assertEqual(column[1], query_results[i])
 
+    def test_return_columns(self):
+        for table in self.accessible_tables:
+            #Arrange
+            #query db for expected results
+            db_columns = []
+            if table == 'substations':
+                db_columns = ["name", 
+                                "node_code", 
+                                "node_type",
+                                "substation_type", 
+                                "owner", 
+                                "province", 
+                                "latitude", 
+                                "longitude", 
+                                "planning_region", 
+                                "sources", 
+                                "notes"]
+            elif table == 'interties':
+                db_columns = ["name", 
+                                "node_code", 
+                                "node_type",
+                                "intertie_type", 
+                                "owner", 
+                                "province", 
+                                "latitude", 
+                                "longitude", 
+                                "planning_region", 
+                                "sources", 
+                                "notes"]
+            elif table == 'junctions':
+                db_columns = ["name", 
+                                "node_code", 
+                                "node_type", 
+                                "owner", 
+                                "province", 
+                                "latitude", 
+                                "longitude", 
+                                "planning_region", 
+                                "sources", 
+                                "notes"]
+            else:   
+                query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+                results = self.send_query(query)
+                if results == 0:
+                    return 0
+                for columns in results:
+                    db_columns.append(columns[0])
+
+            #Act
+            #invoke API and collect results
+            response = requests.get(BASE + table + "/attributes")
+            response_code = response.status_code
+            response_list = response.json()
+
+            #Assert
+            ## Check the status code and return type
+            self.assertEqual(response_code, 200)
+            self.assertEqual(type(response_list), list)
+            
+            ## Check if the number of rows is equal
+            self.assertEqual(len(response_list), len(db_columns))
+
+            ## Check if the first row is the same
+            self.assertEqual(response_list[1], db_columns[1])
+            
+            ## Check if the last row is the same
+            self.assertEqual(response_list[-1], db_columns[-1])
+
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()
+
+
+
