@@ -132,7 +132,7 @@ def get_columns(table):
         for column in results:
             columns.append(column[0])
     else:   
-        query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+        query = f"SELECT DISTINCT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
         results = send_query(query)
         if results == 0:
             return 0
