@@ -7,10 +7,10 @@ BASE = "http://127.0.0.1:5000/"
 class Tests(unittest.TestCase):
     ## Initialize the mysql cursor
     db = mysql.connector.connect(
-        host='', 
-        user='', 
+        host='localhost', 
+        user='root', 
         password='', 
-        database=''
+        database='CODERS_draft'
     )
     cursor = db.cursor()
 
@@ -43,6 +43,7 @@ class Tests(unittest.TestCase):
 
     def test_return_table(self):
         for table in self.accessible_tables:
+            #print("return_table table:"+table)
             #Arrange
             if table == "substations":
                 query = f"SELECT \
@@ -105,6 +106,7 @@ class Tests(unittest.TestCase):
 
     def test_return_columns(self):
         for table in self.accessible_tables:
+            #print("return_columns table:"+table)
             #Arrange
             #query db for expected results
             db_columns = []
@@ -143,7 +145,8 @@ class Tests(unittest.TestCase):
                                 "planning_region", 
                                 "sources", 
                                 "notes"]
-            else:   
+            else:
+                # print("Table="+table+" is using query")   
                 query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
                 results = self.send_query(query)
                 if results == 0:
@@ -166,13 +169,32 @@ class Tests(unittest.TestCase):
             self.assertEqual(len(response_list), len(db_columns))
 
             ## Check if the first row is the same
+            # print(response_list)
+            # print("========")
+            # print(db_columns)
             self.assertEqual(response_list[1], db_columns[1])
             
             ## Check if the last row is the same
             self.assertEqual(response_list[-1], db_columns[-1])
 
+    def test_return_ref_w_good_id(self):
+        #Arrange
+        ref_id = 9100
+        query = f"SELECT * FROM reference_list WHERE id = {ref_id}"
+        db_result = self.send_query(query)
+
+        #Act
+        response = requests.get(BASE + "references?key=" + str(ref_id))
+        response_code = response.status_code
+        response_list = response.json() 
+        response_row = response_list[0].values() 
+  
+        #Assert
+        self.assertEqual(response_code, 200)
+        self.assertEqual(type(response_list), list)
+        for i,column in enumerate(response_row):
+            self.assertEqual(column, db_result[0][i])
+
+
 if __name__ == '__main__':
-    unittest.main()
-
-
-
+	unittest.main()
