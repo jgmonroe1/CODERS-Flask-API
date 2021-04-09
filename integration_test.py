@@ -2,6 +2,7 @@ import unittest
 import requests
 import mysql.connector
 import decimal 
+import datetime
 
 BASE = "http://127.0.0.1:5000/"
 
@@ -11,27 +12,38 @@ class Tests(unittest.TestCase):
         host='localhost', 
         user='root', 
         password='', 
-        database='coders_draft'
+        database=''
     )
     cursor = db.cursor()
 
     ## List of tables you can access through the api
+    # accessible_tables = ("generators",
+    #                     "substations",
+    #                     "transmission_lines",
+    #                     "storage_batteries",
+    #                     "interties",
+    #                     "junctions",
+    #                     "distribution_transfers",
+    #                     "contribution_transfers",
+    #                     "generation_costs",
+    #                     "international_transfers",
+    #                     "interprovincial_transfers",
+    #                     "provincial_demand",
+    #                     "interface_capacity",
+    #                     "cpi_can",
+    #                     "references"
+    #                     )
     accessible_tables = ("generators",
                         "substations",
                         "transmission_lines",
-                        "storage_batteries",
                         "interties",
                         "junctions",
-                        "distribution_transfers",
-                        "contribution_transfers",
                         "generation_costs",
                         "international_transfers",
                         "interprovincial_transfers",
-                        "provincial_demand",
-                        "intertie_all",
-                        "intertie_provincial",
                         "cpi_can",
-                        "reference_list")
+                        "references"
+                        )
 
     def send_query(self, query):
         cur = self.db.cursor()
@@ -43,9 +55,17 @@ class Tests(unittest.TestCase):
             print("issue with sql query")
 
     def test_return_table(self):
+        #set variables to test 
+        international_transfers_test_year = 2019
+        international_transfers_test_prov = "AB"
+        international_transfers_test_state = "US-Montana"
+        interprovincial_transfers_test_year = 2019
+        interprovincial_transfers_test_prov_1 = "AB"
+        interprovincial_transfers_test_prov_2 = "SK"
+        #loop through each table 
         for table in self.accessible_tables:
-            #print("return_table table:"+table)
             #Arrange
+            #some tables require query modifications
             if table == "substations":
                 query = f"SELECT \
                             n.name, \
@@ -78,14 +98,40 @@ class Tests(unittest.TestCase):
                             n.notes \
                             FROM nodes n \
                         JOIN interties i ON n.node_code = i.int_node_code;"
+            elif table == "international_transfers":
+                query = f"SELECT * FROM international_transfers \
+                            WHERE province = '{international_transfers_test_prov}' \
+                            AND us_state = '{international_transfers_test_state}' \
+                            AND (local_time LIKE '{international_transfers_test_year}%' \
+                            OR (local_time LIKE '{int(international_transfers_test_year) + 1}%' \
+                            AND annual_hour_ending = 8760));"
+            elif table == "interprovincial_transfers":
+                query = f"SELECT * FROM interprovincial_transfers \
+                            WHERE province_1 = '{interprovincial_transfers_test_prov_1}' \
+                            AND province_2 = '{interprovincial_transfers_test_prov_2}' \
+                            AND (local_time LIKE '{interprovincial_transfers_test_year}%' \
+                            OR (local_time LIKE '{int(interprovincial_transfers_test_year) + 1}%' \
+                            AND annual_hour_ending = 8760));"            
             else:
+                #references table is named reference_list in db but we changed it to be more readible
+                if table == "references":
+                    table = "reference_list"
                 query = f"SELECT * FROM {table};"
-
-            query_results = self.send_query(query)
-
-
+            #after creating query send it off to db
+            db_result = self.send_query(query)
+            #change reference_list back to references for API call
+            if table == "reference_list":
+                    table = "references"    
             #Act
-            response = requests.get(BASE + table)
+            #some tables need special API call
+            if table == "international_transfers":
+                request = BASE + table + f"?year={international_transfers_test_year}&province={international_transfers_test_prov}&us_region={international_transfers_test_state}"
+            elif table == "interprovincial_transfers":
+                request = BASE + table + f"?year={interprovincial_transfers_test_year}&province1={interprovincial_transfers_test_prov_1}&province2={interprovincial_transfers_test_prov_2}"
+            else:
+                request = BASE + table
+            #invoke API and collect results
+            response = requests.get(request)
             response_code = response.status_code
             response_list = response.json()
 
@@ -95,19 +141,30 @@ class Tests(unittest.TestCase):
             self.assertEqual(type(response_list), list)
             
             ## Check if the number of rows is equal
-            self.assertEqual(len(response_list), len(query_results))
+            self.assertEqual(len(response_list), len(db_result))
 
             ## Check if the first row is the same
-            for i,column in enumerate(response_list[0]):
-                self.assertEqual(column[1], query_results[i])
+            for i,column in enumerate(response_list[0].values()):
+                if type(db_result[0][i]) == decimal.Decimal:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = float(db_result[0][i])
+                if type(db_result[0][i]) == datetime.datetime:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = str(db_result[0][i])
+                self.assertEqual(column, db_result[0][i])
             
             ## Check if the last row is the same
-            for i,column in enumerate(response_list[-1]):
-                self.assertEqual(column[1], query_results[i])
+            for i,column in enumerate(response_list[-1].values()):
+                if type(db_result[-1][i]) == decimal.Decimal:
+                    db_result[-1] = list(db_result[-1])
+                    db_result[-1][i] = float(db_result[-1][i])
+                if type(db_result[-1][i]) == datetime.datetime:
+                    db_result[-1] = list(db_result[-1])
+                    db_result[-1][i] = str(db_result[-1][i])
+                self.assertEqual(column, db_result[-1][i])
 
     def test_return_columns(self):
         for table in self.accessible_tables:
-            #print("return_columns table:"+table)
             #Arrange
             #query db for expected results
             db_columns = []
@@ -147,14 +204,18 @@ class Tests(unittest.TestCase):
                                 "sources", 
                                 "notes"]
             else:
-                # print("Table="+table+" is using query")   
-                query = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+                if table == "references":
+                    table = "reference_list" 
+                query = f"SELECT DISTINCT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
                 results = self.send_query(query)
+                
+                if table == "reference_list":
+                    table = "references"
+
                 if results == 0:
                     return 0
                 for columns in results:
                     db_columns.append(columns[0])
-
             #Act
             #invoke API and collect results
             response = requests.get(BASE + table + "/attributes")
@@ -170,9 +231,6 @@ class Tests(unittest.TestCase):
             self.assertEqual(len(response_list), len(db_columns))
 
             ## Check if the first row is the same
-            # print(response_list)
-            # print("========")
-            # print(db_columns)
             self.assertEqual(response_list[1], db_columns[1])
             
             ## Check if the last row is the same
@@ -180,7 +238,7 @@ class Tests(unittest.TestCase):
 
     def test_return_ref_w_good_id(self):
         #Arrange
-        ref_id = 1
+        ref_id = 174
         query = f"SELECT * FROM reference_list WHERE id = {ref_id}"
         db_result = self.send_query(query)
 
