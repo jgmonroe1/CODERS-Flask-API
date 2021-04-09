@@ -404,10 +404,13 @@ def return_international_hourly_transfers(year, province, state):
     elif not state:
         raise InvalidUsage('No US region provided',status_code=404)
 
+    ## The "year + 1" condition grabs the last row which is the start of the next year
     query = f"SELECT * FROM international_transfers \
                 WHERE province = '{province}' AND \
                 us_state = '{state}' AND \
-                local_time LIKE '{year}%'"
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
 
     result = send_query(query)
     ## Handling empty tables and bad requests
@@ -434,10 +437,13 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
     elif not province_1 or not province_2:
         raise InvalidUsage('Did not provide two provinces',status_code=404)
 
+    ## The "year + 1" condition grabs the last row which is the start of the next year
     query = f"SELECT * FROM interprovincial_transfers \
                 WHERE province_1 = '{province_1}' AND \
                 province_2 = '{province_2}' AND \
-                local_time LIKE '{year}%';"
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
     result = send_query(query)
 
     ## Handling empty tables and bad requests
@@ -463,9 +469,12 @@ def return_provincial_hourly_demand(year, province):
     elif not province:
         raise InvalidUsage('No province provided',status_code=404)
 
+    ## The "year + 1" condition grabs the last row which is the start of the next year
     query = f"SELECT * FROM provincial_demand \
                 WHERE province = '{province}' AND \
-                local_time LIKE '{year}%'"
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
     
     result = send_query(query)
     ## Handling bad requests
