@@ -11,8 +11,8 @@ class Tests(unittest.TestCase):
     db = mysql.connector.connect(
         host='localhost', 
         user='root', 
-        password='Databecrazy#1978', 
-        database='coders_draft'
+        password='', 
+        database=''
     )
     cursor = db.cursor()
 
