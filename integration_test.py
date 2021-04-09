@@ -11,8 +11,8 @@ class Tests(unittest.TestCase):
     db = mysql.connector.connect(
         host='localhost', 
         user='root', 
-        password='', 
-        database=''
+        password='Databecrazy#1978', 
+        database='coders_draft'
     )
     cursor = db.cursor()
 
@@ -142,7 +142,7 @@ class Tests(unittest.TestCase):
             
             ## Check if the number of rows is equal
             self.assertEqual(len(response_list), len(db_result))
-
+            print(table)
             ## Check if the first row is the same
             for i,column in enumerate(response_list[0].values()):
                 if type(db_result[0][i]) == decimal.Decimal:
@@ -259,6 +259,9 @@ class Tests(unittest.TestCase):
         #Arrange
         province = 'AB'
         for table in self.accessible_tables:
+            if table == "references":
+                table = "reference_list"
+
             if table in  ("distribution_transfers",
                             "contribution_transfers",
                             "generation_costs",
