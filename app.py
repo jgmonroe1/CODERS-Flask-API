@@ -176,6 +176,7 @@ def start_up():
 ##Return swagger documentation
 @app.route('/api/docs')
 def return_docs():
+    print(type(render_template('swaggerui.html')))
     return render_template('swaggerui.html')
 
 ##Returns the available filters
@@ -416,9 +417,11 @@ def return_international_hourly_transfers(year, province, state):
         raise InvalidUsage('No results found',status_code=404)
 
     column_names = get_columns("international_transfers")
-
+    
     ## Format the list to "'column_name': 'value'"
     for i,row in enumerate(result):
+        row = list(row)
+        row[0] = str(row[0])
         row = dict(zip(column_names, row))
         result[i] = row
     return json.dumps(result, cls= Encoder)
@@ -446,6 +449,8 @@ def return_interprovincial_hourly_transfer(year, province_1, province_2):
 
     ## Format the list to "'column_name': 'value'"
     for i,row in enumerate(result):
+        row = list(row)
+        row[0] = str(row[0])
         row = dict(zip(column_names, row))
         result[i] = row
     return json.dumps(result, cls= Encoder)
@@ -472,6 +477,8 @@ def return_provincial_hourly_demand(year, province):
 
     ## Format the list to "'column_name': 'value'"
     for i,row in enumerate(result):
+        row = list(row)
+        row[0] = str(row[0])
         row = dict(zip(column_names, row))
         result[i] = row
     return json.dumps(result, cls= Encoder)
@@ -481,6 +488,9 @@ def return_generator_type(province, gen_type):
     ## Handling unknown generator type
     if gen_type not in gen_types:
         raise InvalidUsage('Invalid generator type',status_code=404)
+    if province is None:
+        raise InvalidUsage('No province provided', status_code=404)
+
     query = f"SELECT * FROM generators \
                 WHERE gen_type_copper = '{gen_type}' AND \
                 province = '{province}';"

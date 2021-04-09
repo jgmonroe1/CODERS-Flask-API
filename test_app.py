@@ -10,11 +10,39 @@ class TestApp(unittest.TestCase):
 		response = requests.get(BASE)
 		response_string = response.json()
 		self.assertEqual(response_string[:31],"Welcome to the CODERS database!")
+	
+	def test_return_docs_wrong_spelling(self):
+		response = requests.get(BASE + "/ap/doc")
+		response_string = response.json()
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_string['message'], 'Table not recognized')
+		
+	def test_return_filters_wrong_spelling(self):
+		response = requests.get(BASE + "/fiters")
+		response_string = response.json()
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_string['message'], 'Table not recognized')
+
+	def test_return_filters(self):
+		response = requests.get(BASE + '/filters')
+		response_string = response.json()
+		response_code = response.status_code
+		self.assertEqual(response_code, 200)
+		self.assertEqual(response_string[:34], 'Province: substations, generators,')
 
 	def test_show_tables(self):
 		response = requests.get(BASE+"/tables")
 		response_list = response.json()
 		self.assertEqual(type(response_list),type([1,1]))
+	
+	def test_return_table_wrong_spelling(self):
+		response = requests.get(BASE + "/talbes")
+		response_message = response.json()
+		response_code = response.status_code
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_message['message'], 'Table not recognized')
 
 	def test_return_table(self):
 		response = requests.get(BASE+"/generators")
@@ -27,6 +55,13 @@ class TestApp(unittest.TestCase):
 		response_dict = response.json()
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'],'Table not recognized')
+
+	def test_return_columns_wrong_spelling(self):
+		response = requests.get(BASE + "/junctions/atributes")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], '/junctions/atributes not recognized')
 
 	def test_return_columns(self):
 		response = requests.get(BASE+"/substations/attributes")
@@ -67,11 +102,17 @@ class TestApp(unittest.TestCase):
 		response_dict = response.json()
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'],'Key must be a positive integer')
+	def test_return_ref_not_in_db(self):
+		response = requests.get(BASE + "/references?key=200000000")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'Key was not associated with any reference')
 
 	def test_return_based_on_prov(self):
 		response = requests.get(BASE+"/substations?province=NB")
 		response_list = response.json()
-		self.assertEqual(type(response_list),dict)
+		self.assertEqual(type(response_list),list)
 
 	def test_return_based_on_prov_wrong_table(self):
 		response = requests.get(BASE+"/not_a_table?province=NB")
@@ -122,6 +163,13 @@ class TestApp(unittest.TestCase):
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'], 'No hydro_daily generators found in FOO')
 
+	def test_return_generator_type_no_results(self):
+		response = requests.get(BASE + "/generators?province=AB&type=hydro_monthly")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No hydro_monthly generators found in AB')
+
 	## TRY BREAK THE CODE
 	##=======================
 
@@ -167,5 +215,26 @@ class TestApp(unittest.TestCase):
 		response_dict = response.json()
 		self.assertEqual(response_code, 404)
 		self.assertEqual(response_dict['message'], 'Did not provide two provinces')
+
+	def test_provincial_demand_no_year(self):
+		response = requests.get(BASE + "/provincial_demand?province=AB")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No year provided')
+	
+	def test_provincial_demand_no_prov(self):
+		response = requests.get(BASE + "/provincial_demand?year=2018")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No province provided')
+
+	def test_gen_type_no_province(self):
+		response = requests.get(BASE + "/generators?type=coal")
+		response_code = response.status_code
+		response_dict = response.json()
+		self.assertEqual(response_code, 404)
+		self.assertEqual(response_dict['message'], 'No province provided')
 if __name__ == '__main__':
 	unittest.main()
