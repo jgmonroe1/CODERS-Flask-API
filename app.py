@@ -69,7 +69,7 @@ accessible_tables = ("generators",
                     "interprovincial_transfers",
                     "provincial_demand",
                     "interface_capacity",
-                    "cpi_can",
+                    "transfer_capacity_copper",
                     "references")
 
 gen_types = ("wind",
