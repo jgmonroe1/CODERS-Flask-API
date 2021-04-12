@@ -11,8 +11,8 @@ class Tests(unittest.TestCase):
     db = mysql.connector.connect(
         host='localhost', 
         user='root', 
-        password='', 
-        database=''
+        password='Databecrazy#1978', 
+        database='coders_draft'
     )
     cursor = db.cursor()
 
@@ -41,7 +41,8 @@ class Tests(unittest.TestCase):
                         "generation_costs",
                         "international_transfers",
                         "interprovincial_transfers",
-                        "cpi_can",
+                        "transfer_capacity_copper",
+                        "interface_capacity",
                         "references"
                         )
 
@@ -142,7 +143,7 @@ class Tests(unittest.TestCase):
             
             ## Check if the number of rows is equal
             self.assertEqual(len(response_list), len(db_result))
-            print(table)
+            
             ## Check if the first row is the same
             for i,column in enumerate(response_list[0].values()):
                 if type(db_result[0][i]) == decimal.Decimal:
@@ -338,66 +339,123 @@ class Tests(unittest.TestCase):
                     db_result[-1][i] = float(db_result[-1][i])
                 self.assertEqual(column, db_result[-1][i])
 
-    def return_international_hourly_transfers(self):
+    def test_return_international_hourly_transfers(self):
         ##Arrange
         province = 'AB'
         us_region = 'US-Montana'
         year = 2018
-        query = f"SELECT * FROM international_transfers WHERE local_time LIKE '2018%'AND province = '{province}' and us_state = '{us_region}';"
+        query = f"SELECT * FROM international_transfers \
+                WHERE province = '{province}' AND \
+                us_state = '{us_region}' AND \
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
 
         #Act
         db_result = self.send_query(query)
-        response = requests.get(BASE + f"international_transfers?year={year}&province={province}&us_region={US-Montana}")
+        response = requests.get(BASE + f"international_transfers?year={year}&province={province}&us_region={us_region}")
         response_code = response.status_code
         response_list = response.json()
-        response_reow = response_list[0].values()
+        response_row = response_list[0].values()
 
         #Assert
         self.assertEqual(response_code, 200)
         self.assertEqual(type(response_list),list)
         self.assertEqual(len(response_list), len(db_result))
+        
         for i,column in enumerate(response_row):
+            if type(db_result[0][i]) == datetime.datetime:
+                db_result[0] = list(db_result[0])
+                db_result[0][i] = str(db_result[0][i])
+            if type(db_result[0][i]) == decimal.Decimal:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = float(db_result[0][i])
             self.assertEqual(column,db_result[0][i])
 
-    def return_interprovincial_hourly_transfers(self):
+    def test_return_interprovincial_hourly_transfers(self):
         ##Arrange
-        province1 = 'BC'
-        province2 = 'AB-AESO'
+        province_1 = 'BC'
+        province_2 = 'AB-AESO'
         year = 2018
-        query = f"SELECT * FROM international_transfers WHERE local_time LIKE '{year}%'AND province_1 = '{province1}' and province_2 = '{province2}';"
+        query = f"SELECT * FROM interprovincial_transfers \
+                WHERE province_1 = '{province_1}' AND \
+                province_2 = '{province_2}' AND \
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
 
         #Act
         db_result = self.send_query(query)
-        response = requests.get(BASE + f"interprovincial_transfers?year={year}&province1={province1}&province2={province2}")
+        response = requests.get(BASE + f"interprovincial_transfers?year={year}&province1={province_1}&province2={province_2}")
         response_code = response.status_code
         response_list = response.json()
-        response_reow = response_list[0].values()
-
+        response_row = response_list[0].values()
+        
         #Assert
         self.assertEqual(response_code, 200)
         self.assertEqual(type(response_list),list)
         self.assertEqual(len(response_list), len(db_result))
         for i,column in enumerate(response_row):
+            if type(db_result[0][i]) == datetime.datetime:
+                db_result[0] = list(db_result[0])
+                db_result[0][i] = str(db_result[0][i])
+            if type(db_result[0][i]) == decimal.Decimal:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = float(db_result[0][i])
             self.assertEqual(column,db_result[0][i])
 
-    def return_provincial_hourly_demand(self):
+    def test_return_provincial_hourly_demand(self):
         ##Arrange
         province = 'AB'
         year = 2018
-        query = f"SELECT * FROM international_transfers WHERE local_time LIKE '{year}%' AND province_1 = '{province1}';"
+        query = f"SELECT * FROM provincial_demand \
+                WHERE province = '{province}' AND \
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
 
         #Act
         db_result = self.send_query(query)
-        response = requests.get(BASE + f"interprovincial_transfers?year={year}&province1={province1}&province2={province2}")
+        response = requests.get(BASE + f"provincial_demand?year={year}&province={province}")
         response_code = response.status_code
         response_list = response.json()
-        response_reow = response_list[0].values()
+        response_row = response_list[0].values()
 
         #Assert
         self.assertEqual(response_code, 200)
         self.assertEqual(type(response_list),list)
         self.assertEqual(len(response_list), len(db_result))
         for i,column in enumerate(response_row):
+            if type(db_result[0][i]) == datetime.datetime:
+                db_result[0] = list(db_result[0])
+                db_result[0][i] = str(db_result[0][i])
+            if type(db_result[0][i]) == decimal.Decimal:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = float(db_result[0][i])
             self.assertEqual(column,db_result[0][i])
+
+    def test_return_generator_type(self):
+        #Arrange
+        province = 'AB'
+        gen_type = 'biomass'
+        query = f"SELECT * FROM generators WHERE province = 'AB' AND gen_type_copper = 'biomass';"
+
+        #Act
+        db_result = self.send_query(query)
+        response = requests.get(BASE + f"generators?province={province}&type=biomass")
+        response_code = response.status_code
+        response_list = response.json()
+        response_row = response_list[0].values()
+
+        #Asser
+        self.assertEqual(response_code, 200)
+        self.assertEqual(type(response_list),list)
+        self.assertEqual(len(response_list), len(db_result))
+        for i,column in enumerate(response_row):
+            if type(db_result[0][i]) == decimal.Decimal:
+                    db_result[0] = list(db_result[0])
+                    db_result[0][i] = float(db_result[0][i])
+            self.assertEqual(column,db_result[0][i])
+
 if __name__ == '__main__':
 	unittest.main()
