@@ -667,17 +667,6 @@
       "summary": "Return all generation costs and all their attributes",
       "get": {
         "description": "Operation to fetch list of all generation costs",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "province",
-            "description": "Filter objects based on province",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Success Response",
@@ -736,9 +725,27 @@
         "parameters": [
           {
             "in": "query",
+            "name": "year",
+            "description": "Filter objects based on year",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
             "name": "province",
             "description": "Filter objects based on province",
-            "required": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "us_region",
+            "description": "Filter objects based on US region",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -812,9 +819,27 @@
         "parameters": [
           {
             "in": "query",
-            "name": "province",
-            "description": "Filter objects based on province",
-            "required": false,
+            "name": "year",
+            "description": "Filter objects based on year",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "province1",
+            "description": "Filter objects based on province 1",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "province2",
+            "description": "Filter objects based on province 1",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -888,8 +913,17 @@
         "parameters": [
           {
             "in": "query",
-            "name": "provincial_demand",
-            "description": "List of every provincial demand and its attributes",
+            "name": "year",
+            "description": "Filter objects based on year",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "province",
+            "description": "Filter objects based on province",
             "required": true,
             "schema": {
               "type": "string"
@@ -957,28 +991,17 @@
         }
       }
     },
-    "/intertie_all": {
-      "summary": "Return all intertie alls and all their attributes",
+    "/interface_capacities": {
+      "summary": "Return all interface capacities and all their attributes",
       "get": {
-        "description": "Operation to fetch list of all intertie alls",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "intertie_all",
-            "description": "List of every intertie all and its attributes",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "description": "Operation to fetch list of all interface capacities",
         "responses": {
           "200": {
             "description": "Success Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/intertie_all"
+                  "$ref": "#/components/schemas/interface_capacities"
                 }
               }
             }
@@ -996,7 +1019,7 @@
         }
       }
     },
-    "/intertie_all/attributes": {
+    "/interface_capacities/attributes": {
       "get": {
         "description": "Operation to fetch list of all attributes",
         "responses": {
@@ -1023,28 +1046,17 @@
         }
       }
     },
-    "/intertie_provincial": {
-      "summary": "Return all intertie provincials and all their attributes",
+    "/transfer_capacities": {
+      "summary": "Return all transfer capacities and all their attributes",
       "get": {
-        "description": "Operation to fetch list of all intertie provincials",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "intertie_provincial",
-            "description": "List of every intertie provincial and its attributes",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "description": "Operation to fetch list of all transfer capacities",
         "responses": {
           "200": {
             "description": "Success Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/intertie_provincial"
+                  "$ref": "#/components/schemas/transfer_capacities"
                 }
               }
             }
@@ -1062,73 +1074,7 @@
         }
       }
     },
-    "/intertie_provincial/attributes": {
-      "get": {
-        "description": "Operation to fetch list of all attributes",
-        "responses": {
-          "200": {
-            "description": "Success Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/attributes"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/table_not_rec"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/cpi_can": {
-      "summary": "Return all cpi cans and all their attributes",
-      "get": {
-        "description": "Operation to fetch list of all cpi cans",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "cpi_can",
-            "description": "List of every cpi can and its attributes",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/cpi_can"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/table_not_rec"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/cpi_can/attributes": {
+    "/transfer_capacities/attributes": {
       "get": {
         "description": "Operation to fetch list of all attributes",
         "responses": {
@@ -1278,13 +1224,13 @@
               "type": "string",
               "example": "BC windro"
             },
-            "location": {
-              "type": "string",
-              "example": "Foobar inlet"
-            },
             "province": {
               "type": "string",
               "example": "BC"
+            },
+            "location": {
+              "type": "string",
+              "example": "Foobar inlet"
             },
             "latitude": {
               "type": "number",
@@ -1297,6 +1243,10 @@
             "ballance_area": {
               "type": "string",
               "example": "British Columbia.a"
+            },
+            "planning_region": {
+              "type": "string",
+              "example": "South"
             },
             "connecting_node": {
               "type": "string",
@@ -1394,7 +1344,7 @@
               "type": "integer",
               "example": 5
             },
-            "forced-outage_rage": {
+            "forced_outage_rage": {
               "type": "number",
               "example": "20.21%"
             },
@@ -1607,6 +1557,10 @@
             "ballance_area": {
               "type": "string",
               "example": "British Columbia.a"
+            },
+            "planning_region": {
+              "type": "string",
+              "example": "South"
             },
             "connecting_node": {
               "type": "string",
@@ -2060,15 +2014,23 @@
           }
         }
       },
-      "intertie_all": {
+      "interface_capacities": {
         "type": "array",
         "items": {
           "properties": {
-            "exporter": {
+            "country_from": {
               "type": "string",
-              "example": "USA (New York)"
+              "example": "United States"
             },
-            "importer": {
+            "country_to": {
+              "type": "string",
+              "example": "Canada"
+            },
+            "state_prov_from": {
+              "type": "string",
+              "example": "New York"
+            },
+            "state_prov_to": {
               "type": "string",
               "example": "Quebec (South)"
             },
@@ -2076,21 +2038,13 @@
               "type": "string",
               "example": "ac"
             },
-            "flow_limits_summer": {
+            "capacity_summer": {
               "type": "integer",
               "example": 2275
             },
-            "flow_limits_winter": {
+            "capacity_winter": {
               "type": "integer",
               "example": 75
-            },
-            "CA_nodal_zone": {
-              "type": "string",
-              "example": "West - Foobar"
-            },
-            "USA_nodal_zone": {
-              "type": "string",
-              "example": "East - Foobar"
             },
             "other_ref": {
               "type": "string",
@@ -2103,40 +2057,37 @@
           }
         }
       },
-      "intertie_provincial": {
+      "transfer_capacities": {
         "type": "array",
         "items": {
           "properties": {
-            "exporter": {
+            "ballancing_area_from": {
               "type": "string",
               "example": "Alberta.a"
             },
-            "importer": {
+            "ballancing_area_to": {
               "type": "string",
-              "example": "British Columbia.a"
+              "example": "British Comlumia.a"
             },
             "copper_code": {
               "type": "string",
               "example": "Alberta.a.British Columbia.a"
             },
-            "transfer_capacity": {
+            "capacity_summer": {
               "type": "integer",
-              "example": 1000
-            }
-          }
-        }
-      },
-      "cpi_can": {
-        "type": "array",
-        "items": {
-          "properties": {
-            "year": {
-              "type": "integer",
-              "example": 1990
+              "example": 2275
             },
-            "cpi": {
-              "type": "number",
-              "example": 1234.1
+            "capacity_winter": {
+              "type": "integer",
+              "example": 75
+            },
+            "other_ref": {
+              "type": "string",
+              "example": "some reference material"
+            },
+            "notes": {
+              "type": "string",
+              "example": "foobar"
             }
           }
         }
