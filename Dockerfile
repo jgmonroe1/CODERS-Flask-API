@@ -1,5 +1,5 @@
 #specifying our base image
-FROM python:3
+FROM tiangolo/uwsgi-nginx-flask:python3.8
 
 #set a directory for the app
 WORKDIR /usr/src/app
