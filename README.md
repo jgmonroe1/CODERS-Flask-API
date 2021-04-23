@@ -23,22 +23,23 @@ cd to the repos directory, then run this command:<br />
 ### Run Docker Container
 While in the same directory use:<br />
 <br />
-`$ docker run --rm -p 8888:5000 --name coders_api <docker_username>/coders_api` <br />
+`$ docker run -d --rm -p 80:80 --name coders_api <docker_username>/coders_api` <br />
 <br />
 to run the API <br />
 <br />
+*`-d` runs docker in detached mode*<br />
 *`--rm` auto removes container on exit* <br />
-*`-p 8888:5000` publish a containers port to host* <br />
+*`-p 80:80` publish a containers port to host* <br />
 *`--name coders_api` gives container a nickname for easier reference* <br />
 
 ### Test Out API with Swagger UI
 To see if the container and Flask API is working open your favorite web browser and type in: <br />
 <br />
-http://127.0.0.1:8888/docs <br />
+http://<IP>/docs <br />
 <br />
 Now the Swagger UI should pop up. Look around to familiarize with the resources availbale and use the "Try It Out" button to test a request<br />
 <br />
-*notice the port difference between the URL (8888) and what the flask app says (5000), this is because of the port mapping we did in the container*<br />
+
 
 ### Shut it Down
 To stop the API press ctrl c in the terminal to stop the Flask API and then run <br />
@@ -53,4 +54,4 @@ Developed by [Dustin Aldana](https://gitlab.com/DustinAldana) and [Tristan Cusi]
 Lead of database project [Jakub Jurasz](https://www.researchgate.net/profile/Jakub_Jurasz2)
 
 
-[code_button]: https://raw.githubusercontent.com/D-Aldana/CODERS-Flask-API/main/static/img/code_button.png
+[code_button]: https://raw.githubusercontent.com/D-Aldana/CODERS-Flask-API/docker_flask/app/app/static/img/code_button.png
