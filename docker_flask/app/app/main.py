@@ -21,7 +21,7 @@ from classes.encoder import Encoder
 app = Flask(__name__)
 
 ##Configure db
-db = yaml.load(open('db.yaml'), Loader=yaml.FullLoader)
+db = yaml.load(open('/app/app/db.yaml'), Loader=yaml.FullLoader)
 # app.config['MYSQL_HOST'] = db['mysql_host'] #host.docker.internal
 # app.config['MYSQL_USER'] = db['mysql_user']
 # app.config['MYSQL_PASSWORD'] = db['mysql_password']
