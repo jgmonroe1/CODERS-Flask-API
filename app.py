@@ -68,8 +68,8 @@ accessible_tables = ("generators",
                     "international_transfers",
                     "interprovincial_transfers",
                     "provincial_demand",
-                    "interface_capacity",
-                    "transfer_capacity_copper",
+                    "interface_capacities",
+                    "transfer_capacities_copper",
                     "references")
 
 gen_types = ("wind",
@@ -89,6 +89,7 @@ gen_types = ("wind",
 #====================================================================
 ##Executes the query to the database
 def send_query(query):
+    db.reconnect()
     cur = db.cursor()
     try:
         cur.execute(query)
@@ -124,15 +125,8 @@ def get_columns(table):
                         "planning_region", 
                         "sources", 
                         "notes"]
-    elif table == 'references':
-        query = "SELECT DISTINCT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'reference_list' ORDER BY ORDINAL_POSITION"
-        results = send_query(query)
-        if results == 0:
-            return 0
-        for column in results:
-            columns.append(column[0])
     else:   
-        query = f"SELECT DISTINCT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+        query = f"SHOW COLUMNS FROM {table};"
         results = send_query(query)
         if results == 0:
             return 0
@@ -275,6 +269,7 @@ def return_table(table):
     ## Get the column names and send the query
     column_names = get_columns(table)
     result = send_query(query)
+    print(column_names)
     for i,row in enumerate(result):   
         row = dict(zip(column_names, row))
         result[i] = row
