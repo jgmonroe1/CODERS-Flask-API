@@ -1,5 +1,5 @@
 Flask==1.1.2
-Flask_MySQLdb==0.2.0
+mysql-connector-python==8.0.22
 PyYAML==5.4.1
 requests==2.25.1
 Flask-Limiter==1.4
