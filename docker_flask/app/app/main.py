@@ -15,8 +15,8 @@ import yaml
 import os
 import json
 
-from classes.invalidUsage import InvalidUsage 
-from classes.encoder import Encoder
+from .classes.invalidUsage import InvalidUsage 
+from .classes.encoder import Encoder
 
 app = Flask(__name__)
 
