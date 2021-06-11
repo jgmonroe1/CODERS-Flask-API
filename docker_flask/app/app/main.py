@@ -146,26 +146,7 @@ def Convert(lst):
 @app.route('/', methods=['GET'])
 @Limiter.limit('100 per second')
 def start_up():
-    welcome_msg = "Welcome to the CODERS database!\n"
-    functions = "For the list of tables:\n\
-                    http://[domain]/tables\n\n\
-                For a full query of a specified table:\n\
-                    http://[domain]/[table]\n\n\
-                For a list of columns in a specified table:\n\
-                    http://[domain]/[table]/attributes\n\n\
-                For the results of a query filtered by province:\n\
-                    http://[domain]/[table]?province=[province]\n\n\
-                For the hourly transfers between a specified province and US state over a specified year:\n\
-                    http://[domain]/international_transfers?year=[year]&province=[province]&us_region=[state]\n\n\
-                For the hourly transfers between two provinces over a specified year:\n\
-                    http://[domain]/interprovincial_transfers?year=[year]&province1=[province]&province2=[province]\n\n\
-                For the hourly demand in a specified province:\n\
-                    http://[domain]/provincial_demand?year=[year]&province=[province]\n\n\
-                For the generators filtered by province and generation type:\n\
-                    http://[domain]/generators?province=[province]&type=[generation_type]\n\n\
-                For locating a reference:\n\
-                    http://[domain]/references?key=[reference_key]\n".replace('  ','')
-    return jsonify(welcome_msg + functions)
+    return render_template('home.html')
 
 ##Return swagger documentation
 @app.route('/api/docs')
@@ -518,4 +499,4 @@ def return_generator_type(province, gen_type):
 
 if __name__ == '__main__':
     # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")
