@@ -35,7 +35,7 @@ to run the API <br />
 ### Test Out API with Swagger UI
 To see if the container and Flask API is working open your favorite web browser and type in: <br />
 <br />
-http://<IP>/docs <br />
+http://[IP]/api/docs <br />
 <br />
 Now the Swagger UI should pop up. Look around to familiarize with the resources availbale and use the "Try It Out" button to test a request<br />
 <br />
