@@ -157,13 +157,7 @@ def return_docs():
 ##Returns the available filters
 @app.route('/filters', methods=['GET'])
 def return_filters():
-    filters = "Province: substations, generators, transmission_lines, junctions, interties, storage_batteries\n\
-                Province and Generation Type: generators\n\
-                Reference Key: references\n\
-                Year, Province, and US Region: international_transfers\n\
-                Year, Province, and Province: interprovincial_transfers\n\
-                Year and Province: provincial_demand\n".replace('  ', '')
-    return jsonify(filters)
+    return render_template('filters.html')
 
 ##Returns a list of the tables in the DB
 @app.route('/tables', methods=['GET'])
