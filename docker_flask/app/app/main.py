@@ -64,12 +64,23 @@ accessible_tables = ("generators",
                     "junctions",
                     "distribution_transfers",
                     "contribution_transfers",
-                    "generation_costs",
                     "international_transfers",
                     "interprovincial_transfers",
                     "provincial_demand",
                     "interface_capacities",
                     "transfer_capacities_copper",
+                    "CA_system_parameters",
+                    "annual_demand_and_effeciencies",
+                    "forcast_annual_energy_demand",
+                    "forcast_peak_demand",
+                    "generation_cost_evolution",
+                    "generation_generic",
+                    "grid_cell_surface_area",
+                    "hydro_capacity_factor",
+                    "intertie_capacity",
+                    "regional_electrified_demand",
+                    "regional_heat_demand",
+                    "transmission_generic",
                     "references")
 
 gen_types = ("wind",
@@ -181,6 +192,7 @@ def return_table(table):
     us_region = request.args.get('us_region')
     province_1 = request.args.get('province1')
     province_2 = request.args.get('province2')
+    region = request.args.get('region')
     ## Redirect to the generator type filter
     if table == 'generators' and gen_type:
         return return_generator_type(province, gen_type)
@@ -196,6 +208,12 @@ def return_table(table):
     ## Redirect to provincal demand
     elif table == 'provincial_demand':
         return return_provincial_hourly_demand(year, province)
+    elif table == 'annual_demand_and_effeciencies':
+        return return_annual_demand_and_efficiencies(region)
+    elif table == 'hydro_capacity_factor':
+        return return_hydro_cf(year,province)
+    elif table == 'regional_electrified_demand' or table == 'regional_heat_demand':
+        return return_regional_demand(table, year, region)
     ## Redirect to the province filter
     elif province:
         return return_based_on_prov(table, province)
@@ -267,6 +285,60 @@ def return_columns(table, attributes):
     attributes = get_columns(table)
 
     return json.dumps(attributes, cls= Encoder)
+
+## Returns electrified demand based on region and year
+def return_regional_demand(table, year, region):
+    if not region:
+        raise InvalidUsage('No region provided', status_code=404)
+    if not year:
+        raise InvalidUsage('No year provided', status_code=404)
+
+    region = region.replace('_', ' ')
+    query = f"SELECT * FROM {table} \
+                WHERE region = '{region}' AND \
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_end = 8760));"
+
+    result = send_query(query)
+    column_names = get_columns(table)
+
+    if result == 0:
+        raise InvalidUsage('Invalid region and year combination provided',status_code=404)
+    elif len(result) == 0:
+        raise InvalidUsage('No results found',status_code=404)
+
+    ## Format the list to "'column_name': 'value'"
+    for i,row in enumerate(result):
+        row = list(row)
+        row[0] = str(row[0])
+        row = dict(zip(column_names, row))
+        result[i] = row
+
+    return json.dumps(result, cls= Encoder)
+    
+## Returns annual demand and efficiencies from given region
+def return_annual_demand_and_efficiencies(region):
+    if not region:
+        raise InvalidUsage('No region provided', status_code=404)
+    
+    region = region.replace('_', ' ')
+    query = f"SELECT * FROM annual_demand_and_effeciencies WHERE region = '{region}';"
+    
+    result = send_query(query)
+    column_names = get_columns("annual_demand_and_effeciencies")
+
+    if result == 0:
+        raise InvalidUsage('Invalid province',status_code=404)
+    elif len(result) == 0:
+        raise InvalidUsage('No results found',status_code=404)
+
+    ## Format the list to "'column_name': 'value'"
+    for i,row in enumerate(result):
+        row = dict(zip(column_names, row))
+        result[i] = row
+
+    return json.dumps(result, cls= Encoder)
 
 ##Returns the reference from the given reference key
 def return_ref(key):
@@ -362,6 +434,37 @@ def return_based_on_prov(table, province):
         row = dict(zip(column_names, row))
         result[i] = row
 
+    return json.dumps(result, cls= Encoder)
+
+##Returns hydro_capacity_factor table based on province and year
+def return_hydro_cf(year, province):
+    if not year:
+        raise InvalidUsage('No year provided', status_code=404)
+    elif not province:
+        raise InvalidUsage('No province provided',status_code=404)
+
+    query = f"SELECT * FROM hydro_capacity_factor \
+                WHERE province = '{province}' AND \
+                (local_time LIKE '{year}%' OR \
+                (local_time LIKE '{int(year) + 1}%' AND \
+                annual_hour_ending = 8760));"
+
+    result = send_query(query)
+
+    ## Handling empty tables and bad requests
+    if result == 0:
+        raise InvalidUsage('Invalid province and year combination',status_code=404)
+    elif len(result) == 0:
+        raise InvalidUsage('No results found',status_code=404)
+
+    column_names = get_columns("hydro_capacity_factor")
+    
+    ## Format the list to "'column_name': 'value'"
+    for i,row in enumerate(result):
+        row = list(row)
+        row[0] = str(row[0])
+        row = dict(zip(column_names, row))
+        result[i] = row
     return json.dumps(result, cls= Encoder)
 
 ##Returns the transfers between a specified province and US region
