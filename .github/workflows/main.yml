@@ -15,3 +15,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v1
       - uses: ./action-a
+      
+      - name: Run API tests
+        run: | 
+          python ./test/test_app.py
