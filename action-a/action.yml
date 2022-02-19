@@ -1,0 +1,5 @@
+name: "CI action"
+
+runs:
+  using: "docker"
+  image: "./docker_flask/Dockerfile"
