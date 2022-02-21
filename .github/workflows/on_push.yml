@@ -1,4 +1,4 @@
-name: CI
+name: on_push
 
 # Controls when the workflow will run (on push)
 on: push
