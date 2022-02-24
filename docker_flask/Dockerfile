@@ -11,3 +11,5 @@ COPY ./app/app/static /app/static
 
 #install dependencies
 RUN pip install -r /coders_api/requirements.txt
+
+#example change that doesnt effect code functionality
