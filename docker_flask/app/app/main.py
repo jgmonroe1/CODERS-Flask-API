@@ -59,7 +59,7 @@ def handle_invalid_usage(error):
 accessible_tables = ("generators",
                     "substations",
                     "transmission_lines",
-                    "storage_batteries",
+                    "storage",
                     "interties",
                     "junctions",
                     "distribution_transfers",
@@ -81,7 +81,13 @@ accessible_tables = ("generators",
                     "regional_electrified_demand",
                     "regional_heat_demand",
                     "transmission_generic",
-                    "references")
+                    "references",
+                    "hydro_existing",
+                    "Canadian_home_heating_survey_2021_data",
+                    "Canadian_home_heating_survey_2021_datamap",
+                    "generation_planning_reserve",
+                    "hydro_cascade",
+                    "wind_generators")
 
 gen_types = ("wind",
             "gas",
@@ -121,7 +127,7 @@ def get_columns(table):
                         "province", 
                         "latitude", 
                         "longitude", 
-                        "planning_region", 
+                        "operating_region", 
                         "sources", 
                         "notes"]
     elif table == 'interties':
@@ -133,7 +139,7 @@ def get_columns(table):
                         "province", 
                         "latitude", 
                         "longitude", 
-                        "planning_region", 
+                        "operating_region", 
                         "sources", 
                         "notes"]
     else:   
@@ -232,7 +238,7 @@ def return_table(table):
                     n.province, \
                     n.latitude, \
                     n.longitude, \
-                    n.planning_region, \
+                    n.operating_region, \
                     n.sources, \
                     n.notes \
                     FROM nodes n \
@@ -247,7 +253,7 @@ def return_table(table):
                     n.province, \
                     n.latitude, \
                     n.longitude, \
-                    n.planning_region, \
+                    n.operating_region, \
                     n.sources, \
                     n.notes \
                     FROM nodes n \
@@ -384,7 +390,7 @@ def return_based_on_prov(table, province):
                     n.province, \
                     n.latitude, \
                     n.longitude, \
-                    n.planning_region, \
+                    n.operating_region, \
                     n.sources, \
                     n.notes \
                     FROM nodes n \
@@ -401,7 +407,7 @@ def return_based_on_prov(table, province):
                     n.province, \
                     n.latitude, \
                     n.longitude, \
-                    n.planning_region, \
+                    n.operating_region, \
                     n.sources, \
                     n.notes \
                     FROM nodes n \
@@ -413,7 +419,7 @@ def return_based_on_prov(table, province):
         query = f"SELECT * FROM {table} WHERE province = '{province}' \
                 AND node_type = 'JCT';"
     ## Query for the rest of the tables
-    elif table in ("generators","transmission_lines","storage_batteries"):
+    elif table in ("generators","transmission_lines","storage", "hydro_existing", "wind_generators", ):
         query = f"SELECT * FROM  {table} WHERE province = '{province}'"
     else:
         raise InvalidUsage('Table has no province attribute',status_code=404)
