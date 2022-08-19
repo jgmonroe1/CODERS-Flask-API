@@ -70,7 +70,7 @@ accessible_tables = ("generators",
                     "interface_capacities",
                     "transfer_capacities_copper",
                     "CA_system_parameters",
-                    "annual_demand_and_effeciencies",
+                    "annual_demand_and_efficiencies",
                     "forecasted_annual_demand",
                     "forecasted_peak_demand",
                     "generation_cost_evolution",
@@ -214,7 +214,7 @@ def return_table(table):
     ## Redirect to provincal demand
     elif table == 'provincial_demand':
         return return_provincial_hourly_demand(year, province)
-    elif table == 'annual_demand_and_effeciencies':
+    elif table == 'annual_demand_and_efficiencies':
         return return_annual_demand_and_efficiencies(region)
     elif table == 'hydro_capacity_factor':
         return return_hydro_cf(year,province)
@@ -329,10 +329,10 @@ def return_annual_demand_and_efficiencies(region):
         raise InvalidUsage('No region provided', status_code=404)
     
     region = region.replace('_', ' ')
-    query = f"SELECT * FROM annual_demand_and_effeciencies WHERE region = '{region}';"
+    query = f"SELECT * FROM annual_demand_and_efficiencies WHERE region = '{region}';"
     
     result = send_query(query)
-    column_names = get_columns("annual_demand_and_effeciencies")
+    column_names = get_columns("annual_demand_and_efficiencies")
 
     if result == 0:
         raise InvalidUsage('Invalid province',status_code=404)
